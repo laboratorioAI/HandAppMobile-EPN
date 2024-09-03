@@ -19,6 +19,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,6 +31,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -57,15 +59,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
+import androidx.compose.material3.AlertDialog
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import com.example.handappmobile_epn.ui.theme.HandAppMobileEPNTheme
 import java.io.IOException
 import java.util.UUID
 
+
+
+
 // aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 const val REQUEST_ENABLE_BT = 1
 // aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-
-// Push prueba
 
 class MainActivity : ComponentActivity() {
 
@@ -131,6 +138,10 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+
+//            HandAppMobileEPNTheme {
+//                PantallaTutorial(onDismiss = {})
+//            }
         }
     }
 }
@@ -200,13 +211,16 @@ fun PantallaPrincipal(
     var estaSeleccionadaHandiEpn by remember { mutableStateOf(false) }
     var estaSeleccionadaFlexibleB2 by remember { mutableStateOf(false) }
 
+    // Declarar el estado para mostrar la pantalla de tutorial
+    var mostrarPantallaTutorial by remember { mutableStateOf(false) }
+
     // Creación de un bloque vertical de elementos
     Column(
         modifier = modifier.padding(10.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "HANDI EPN",
+            text = "HAND APP EPN",
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
@@ -332,6 +346,16 @@ fun PantallaPrincipal(
                     }
                 }
             }
+        }
+
+        // Botón para activar el diálogo
+        Button(onClick = { mostrarPantallaTutorial = true }) {
+            Text(text = "Activar Bluetooth")
+        }
+
+        // Mostrar la PantallaTutorial cuando se activa
+        if (mostrarPantallaTutorial) {
+            PantallaTutorial(onDismiss = { mostrarPantallaTutorial = false })
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -616,14 +640,329 @@ fun MostrarImagen(mostrar: Boolean, imagenRes: Int, offsetX: Dp, offsetY: Dp, wi
     }
 }
 
-/* Función para implementar la lógica del movimiento de la mano HANDI_EPN */
-@Composable
-fun ControlarDedosHandiEpn(){
 
+@Composable
+fun PantallaTutorial(onDismiss: () -> Unit) {
+    // Declarar el array de 5 elementos con lambdas que invocan composables
+    val ventanasTutorial = listOf<@Composable () -> Unit>(
+        { PrimeraVentanaTutorial() },
+        { SegundaVentanaTutorial() },
+        { TerceraVentanaTutorial() },
+        { CuartaVentanaTutorial() },
+        { QuintaVentanaTutorial() }
+    )
+
+    // Controlar la posición actual en el tutorial
+    var posicionActual by remember { mutableStateOf(0) }
+
+    // Contenido del diálogo
+    AlertDialog(
+        onDismissRequest = { onDismiss() }, // Cerrar el diálogo al hacer clic fuera de él
+        title = {
+            Text("Guía de uso")
+        },
+        text = {
+            Column {
+                // Mostrar la ventana actual según la posición en el array
+                ventanasTutorial[posicionActual]()
+
+                Spacer(modifier = Modifier.height(16.dp)) // Espacio entre el contenido y los botones
+
+                // Fila de botones
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween // Distribuir contenido a los lados
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.Start // Alinear los botones de flechas a la izquierda
+                    ) {
+                        // Botón "Anterior" (desaparece si estamos en la primera ventana)
+                        if (posicionActual > 0) {
+                            Button(onClick = {
+                                if (posicionActual > 0) posicionActual--
+                            }) {
+                                Text("<-")
+                            }
+                        }
+
+                        // Botón "Siguiente" (desaparece si estamos en la última ventana)
+                        if (posicionActual < ventanasTutorial.size - 1) {
+                            Button(onClick = {
+                                if (posicionActual < ventanasTutorial.size - 1) posicionActual++
+                            }) {
+                                Text("->")
+                            }
+                        }
+                    }
+
+                    // Botón "Cerrar" alineado a la derecha
+                    Button(onClick = { onDismiss() }) {
+                        Text("Cerrar")
+                    }
+                }
+            }
+        },
+        confirmButton = {} // Dejar vacío para evitar que se muestre el botón predeterminado
+    )
 }
 
-/* Función para implementar la lógica del movimiento de la mano Flexible_B2 */
+/* Ventana tutorial que corresponde a los permisos del aplicativo */
 @Composable
-fun ControlarDedosFlexibleB2(){
+fun PrimeraVentanaTutorial() {
+    Box(
+        modifier = Modifier.fillMaxWidth() // Ocupa completamente el espacio disponible
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Paso 1",
+                style = TextStyle(
+                    fontWeight = FontWeight.Bold // Negrilla
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+            Text(
+                text = "Verifique que se hayan asignado los permisos correspondientes " +
+                        "a la aplicación.\nUsualmente se encuentran en ajustes/aplicaciones",
+                modifier = Modifier.fillMaxWidth()
+            )
 
+            Image(
+                painter = painterResource(id = R.drawable.permisosaplicacion),
+                contentDescription = "Permisos aplicación",
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally) // Alinea la imagen horizontalmente
+                    .size(200.dp)
+
+
+            )
+        }
+    }
+}
+
+/* Ventana tutorial que corresponde a la conexión bluetooth del equipo */
+@Composable
+fun SegundaVentanaTutorial() {
+    Box(
+        modifier = Modifier.fillMaxWidth() // Ocupa completamente el espacio disponible
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Paso 2",
+                style = TextStyle(
+                    fontWeight = FontWeight.Bold // Negrilla
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+            Text(
+                text = "Verifique que el Bluetooth del dispositivo esté activado",
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Image(
+                painter = painterResource(id = R.drawable.bluetoothactivo),
+                contentDescription = "Bluetooth activado",
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally) // Alinea la imagen horizontalmente
+                    .width(300.dp)
+                    .height(80.dp)
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Text(
+                text = "Paso 3",
+                style = TextStyle(
+                    fontWeight = FontWeight.Bold // Negrilla
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Text(
+                text = "Verifique que el dispositivo se encuentre conectado con las manos",
+                modifier = Modifier.fillMaxWidth()
+            )
+            Image(
+                painter = painterResource(id = R.drawable.dispositivosvinculados),
+                contentDescription = "Dispositivos vinculados",
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally) // Alinea la imagen horizontalmente
+                    .wrapContentSize()
+                    .width(400.dp)
+                    .height(110.dp)
+            )
+        }
+    }
+}
+
+/* Ventana tutorial que corresponde a la selección de una mano dentro del aplicativo */
+@Composable
+fun TerceraVentanaTutorial() {
+
+    Box(
+        modifier = Modifier.fillMaxWidth() // Ocupa completamente el espacio disponible
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            Text(
+                text = "Paso 4",
+                style = TextStyle(
+                    fontWeight = FontWeight.Bold // Negrilla
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Text(
+                text = "Ingresar al apartado de dispositivos bluetoot conectados, dentro del aplicativo",
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Image(
+                painter = painterResource(id = R.drawable.botonvincularbluetooth),
+                contentDescription = "Bluetooth activado",
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally) // Alinea la imagen horizontalmente
+                    .width(200.dp)
+                    .height(80.dp)
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Text(
+                text = "Paso 5",
+                style = TextStyle(
+                    fontWeight = FontWeight.Bold // Negrilla
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Text(
+                text = "Elegir la mano con la que se desee conectar entre las opciones",
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Image(
+                painter = painterResource(id = R.drawable.elegirmano),
+                contentDescription = "Bluetooth activado",
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally) // Alinea la imagen horizontalmente
+                    .width(200.dp)
+                    .height(170.dp)
+            )
+        }
+    }
+}
+
+/* Ventana tutorial que corresponde al uso de la mano */
+@Composable
+fun CuartaVentanaTutorial() {
+    Box(
+        modifier = Modifier.fillMaxWidth() // Ocupa completamente el espacio disponible
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            Text(
+                text = "Paso 6",
+                style = TextStyle(
+                    fontWeight = FontWeight.Bold // Negrilla
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Text(
+                text = "Elegir los dedos que se desean mover. Es importante considerar que: " +
+                        "\n1. Los dedos no elegidos se mostrarán de color blanco " +
+                        "\n2. Los dedos presionados presentarán un contorno gris " +
+                        "\n3. Los dedos elegidos se mostrarán en color verde" +
+                        "\n Al volver a elegir un dedo, se deseleccionará",
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Image(
+                painter = painterResource(id = R.drawable.seleccionardedos),
+                contentDescription = "Bluetooth activado",
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally) // Alinea la imagen horizontalmente
+                    .width(260.dp)
+                    .height(260.dp)
+            )
+        }
+    }
+}
+
+/* Ventana tutorial que corresponde a la señalización de funciones adicionales */
+@Composable
+fun QuintaVentanaTutorial() {
+    Box(
+        modifier = Modifier.fillMaxWidth() // Ocupa completamente el espacio disponible
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            Text(
+                text = "Paso 7",
+                style = TextStyle(
+                    fontWeight = FontWeight.Bold // Negrilla
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Text(
+                text = "Al mover el slider de izquierda a derecha se definirá el porcentaje de movimiento " +
+                        "para los dedos seleccionados",
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Image(
+                painter = painterResource(id = R.drawable.definirmovimiento),
+                contentDescription = "Bluetooth activado",
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally) // Alinea la imagen horizontalmente
+                    .width(200.dp)
+                    .height(80.dp)
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Text(
+                text = "Paso 8",
+                style = TextStyle(
+                    fontWeight = FontWeight.Bold // Negrilla
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Text(
+                text = "El aplicativo cuenta con acciones predeterminadas para la mano",
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Image(
+                painter = painterResource(id = R.drawable.funcionesadicionales),
+                contentDescription = "Bluetooth activado",
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally) // Alinea la imagen horizontalmente
+                    .width(220.dp)
+                    .height(100.dp)
+            )
+        }
+    }
+}
+
+
+@Preview(showBackground = true)
+@Composable
+fun GreetingPreview() {
+    HandAppMobileEPNTheme {
+        QuintaVentanaTutorial()
+        //PantallaTutorial(onDismiss = {})
+    }
 }
