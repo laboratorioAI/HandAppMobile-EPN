@@ -62,6 +62,7 @@ import androidx.core.app.ActivityCompat
 import androidx.compose.material3.AlertDialog
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import com.example.handappmobile_epn.ui.theme.HandAppMobileEPNTheme
 import java.io.IOException
@@ -662,7 +663,10 @@ fun PantallaTutorial(onDismiss: () -> Unit) {
             Text("Guía de uso")
         },
         text = {
-            Column {
+            Column (
+                modifier = Modifier.height(440.dp),
+                verticalArrangement = Arrangement.SpaceBetween
+            ){
                 // Mostrar la ventana actual según la posición en el array
                 ventanasTutorial[posicionActual]()
 
@@ -678,31 +682,39 @@ fun PantallaTutorial(onDismiss: () -> Unit) {
                     ) {
                         // Botón "Anterior" (desaparece si estamos en la primera ventana)
                         if (posicionActual > 0) {
-                            Button(onClick = {
+                            Button(
+                                onClick = {
                                 if (posicionActual > 0) posicionActual--
-                            }) {
+                            },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFF0E172F))) {
                                 Text("<-")
                             }
                         }
 
                         // Botón "Siguiente" (desaparece si estamos en la última ventana)
                         if (posicionActual < ventanasTutorial.size - 1) {
-                            Button(onClick = {
+                            Button(
+                                onClick = {
                                 if (posicionActual < ventanasTutorial.size - 1) posicionActual++
-                            }) {
+                            },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFF0E172F))) {
                                 Text("->")
                             }
                         }
                     }
 
                     // Botón "Cerrar" alineado a la derecha
-                    Button(onClick = { onDismiss() }) {
+                    Button(onClick = { onDismiss() },
+                            colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF0E172F))) {
                         Text("Cerrar")
                     }
                 }
             }
         },
-        confirmButton = {} // Dejar vacío para evitar que se muestre el botón predeterminado
+        confirmButton = {}, // Dejar vacío para evitar que se muestre el botón predeterminado
     )
 }
 
@@ -724,18 +736,18 @@ fun PrimeraVentanaTutorial() {
             )
             Text(
                 text = "Verifique que se hayan asignado los permisos correspondientes " +
-                        "a la aplicación.\nUsualmente se encuentran en ajustes/aplicaciones",
+                        "a la aplicación.\n\nUsualmente se encuentran en ajustes/aplicaciones",
                 modifier = Modifier.fillMaxWidth()
             )
+
+            Spacer(modifier = Modifier.height(10.dp))
 
             Image(
                 painter = painterResource(id = R.drawable.permisosaplicacion),
                 contentDescription = "Permisos aplicación",
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally) // Alinea la imagen horizontalmente
-                    .size(200.dp)
-
-
+                    .size(240.dp)
             )
         }
     }
@@ -782,7 +794,7 @@ fun SegundaVentanaTutorial() {
             )
 
             Text(
-                text = "Verifique que el dispositivo se encuentre conectado con las manos",
+                text = "Verifique que el dispositivo se encuentre vinculado a la(s) prótesis",
                 modifier = Modifier.fillMaxWidth()
             )
             Image(
@@ -818,7 +830,7 @@ fun TerceraVentanaTutorial() {
             )
 
             Text(
-                text = "Ingresar al apartado de dispositivos bluetoot conectados, dentro del aplicativo",
+                text = "Ingrese al apartado de dispositivos Bluetooth conectados dentro del aplicativo",
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -842,13 +854,13 @@ fun TerceraVentanaTutorial() {
             )
 
             Text(
-                text = "Elegir la mano con la que se desee conectar entre las opciones",
+                text = "Elija la prótesis con la que se desee conectar de entre las opciones",
                 modifier = Modifier.fillMaxWidth()
             )
 
             Image(
                 painter = painterResource(id = R.drawable.elegirmano),
-                contentDescription = "Bluetooth activado",
+                contentDescription = "Elegir prótesis",
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally) // Alinea la imagen horizontalmente
                     .width(200.dp)
@@ -877,21 +889,20 @@ fun CuartaVentanaTutorial() {
             )
 
             Text(
-                text = "Elegir los dedos que se desean mover. Es importante considerar que: " +
+                text = "Elija los dedos que desee mover. Es importante considerar que: " +
                         "\n1. Los dedos no elegidos se mostrarán de color blanco " +
                         "\n2. Los dedos presionados presentarán un contorno gris " +
-                        "\n3. Los dedos elegidos se mostrarán en color verde" +
-                        "\n Al volver a elegir un dedo, se deseleccionará",
+                        "\n3. Los dedos elegidos se mostrarán en color verde",
                 modifier = Modifier.fillMaxWidth()
             )
 
             Image(
                 painter = painterResource(id = R.drawable.seleccionardedos),
-                contentDescription = "Bluetooth activado",
+                contentDescription = "Seleccionar dedos",
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally) // Alinea la imagen horizontalmente
-                    .width(260.dp)
-                    .height(260.dp)
+                    .width(200.dp)
+                    .height(200.dp)
             )
         }
     }
@@ -923,11 +934,11 @@ fun QuintaVentanaTutorial() {
 
             Image(
                 painter = painterResource(id = R.drawable.definirmovimiento),
-                contentDescription = "Bluetooth activado",
+                contentDescription = "Definir movimiento",
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally) // Alinea la imagen horizontalmente
-                    .width(200.dp)
-                    .height(80.dp)
+                    .width(220.dp)
+                    .height(100.dp)
             )
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -941,17 +952,17 @@ fun QuintaVentanaTutorial() {
             )
 
             Text(
-                text = "El aplicativo cuenta con acciones predeterminadas para la mano",
+                text = "Considere que el aplicativo cuenta con acciones predeterminadas para la prótesis",
                 modifier = Modifier.fillMaxWidth()
             )
 
             Image(
                 painter = painterResource(id = R.drawable.funcionesadicionales),
-                contentDescription = "Bluetooth activado",
+                contentDescription = "Funciones adicionales",
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally) // Alinea la imagen horizontalmente
-                    .width(220.dp)
-                    .height(100.dp)
+                    .width(240.dp)
+                    .height(120.dp)
             )
         }
     }
@@ -962,7 +973,6 @@ fun QuintaVentanaTutorial() {
 @Composable
 fun GreetingPreview() {
     HandAppMobileEPNTheme {
-        QuintaVentanaTutorial()
-        //PantallaTutorial(onDismiss = {})
+        PantallaTutorial(onDismiss = {})
     }
 }
