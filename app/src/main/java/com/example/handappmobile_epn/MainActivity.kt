@@ -22,6 +22,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,6 +33,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -60,6 +64,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
+import androidx.compose.material.icons.filled.Help
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -139,10 +145,6 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
-
-//            HandAppMobileEPNTheme {
-//                PantallaTutorial(onDismiss = {})
-//            }
         }
     }
 }
@@ -220,10 +222,52 @@ fun PantallaPrincipal(
         modifier = modifier.padding(10.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "HAND APP EPN",
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth() // Ocupa el ancho disponible completo
+                .padding(bottom = 28.dp),
+            horizontalArrangement = Arrangement.SpaceBetween // Alinea los elementos en extremos
+        ) {
+
+            // Spacer para ajustar el espacio entre el texto y el botón
+            Spacer(modifier = Modifier.width(16.dp))
+
+            // Box para centrar el texto
+            Box(
+                modifier = Modifier
+                    .weight(1f) // Ocupa el espacio disponible
+                    .align(Alignment.CenterVertically) // Centrar verticalmente
+            ) {
+                Text(
+                    text = "HAND APP EPN",
+                    modifier = Modifier.align(Alignment.Center) // Centrar el texto horizontalmente
+                )
+            }
+
+            // Botón circular en la esquina superior derecha
+            Button(
+                onClick = { mostrarPantallaTutorial = true },
+                modifier = Modifier
+                    .size(30.dp) // Hacer el botón circular
+                    .align(Alignment.CenterVertically), // Alinear verticalmente dentro de la fila
+                shape = CircleShape, // Hacer que el botón tenga forma circular
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0E172F)),
+                contentPadding = PaddingValues(0.dp) // Eliminar el padding interno del botón
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.Help,
+                    contentDescription = "Ayuda",
+                    tint = Color.White,
+                    modifier = Modifier
+                        .fillMaxSize() // Hacer que el ícono llene todo el botón
+                )
+            }
+        }
+
+        // Mostrar la PantallaTutorial cuando se activa
+        if (mostrarPantallaTutorial) {
+            PantallaTutorial(onDismiss = { mostrarPantallaTutorial = false })
+        }
 
         // Creación de un bloque horizontal de elementos
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -349,15 +393,7 @@ fun PantallaPrincipal(
             }
         }
 
-        // Botón para activar el diálogo
-        Button(onClick = { mostrarPantallaTutorial = true }) {
-            Text(text = "Activar Bluetooth")
-        }
 
-        // Mostrar la PantallaTutorial cuando se activa
-        if (mostrarPantallaTutorial) {
-            PantallaTutorial(onDismiss = { mostrarPantallaTutorial = false })
-        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -527,7 +563,7 @@ fun PantallaPrincipal(
         Row {
             // Botón para abrir la mano
             Button(onClick = {
-                sliderValue = 100f // Ajusta el slider al máximo
+                sliderValue = 0f // Ajusta el slider al mínimo
 
                 /* Ingresar aquí la funcionalidad del botón */
                 sendCommand("O")
@@ -546,7 +582,7 @@ fun PantallaPrincipal(
 
             // Botón para cerrar la mano
             Button(onClick = {
-                sliderValue = 0f // Ajusta el slider al mínimo
+                sliderValue = 100f // Ajusta el slider al máximo
 
                 /* Ingresar aquí la funcionalidad del botón */
                 sendCommand("C")
@@ -583,7 +619,7 @@ fun PantallaPrincipal(
     }
 }
 
-/* Creación de los botones de la mano*/
+/* Creación de los botones de la mano */
 @Composable
 fun LogicaBotonesMano(sliderValue: Float, onDedoPulsado: (String, Boolean) -> Unit) {
     // Botones y lógica de HandiEpn aquí
