@@ -515,24 +515,29 @@ fun PantallaPrincipal(
         ///////////////////
         /* Slider */
         ///////////////////
-        var sliderChangedTimestamp by remember { mutableStateOf(System.currentTimeMillis()) }
+        //var sliderChangedTimestamp by remember { mutableStateOf(System.currentTimeMillis()) }
 
         // Función que envía los comandos cuando el slider termina de moverse
+        var isSliderMoving by remember { mutableStateOf(false) }
+        var sliderValue by remember { mutableStateOf(0f) }
+        var sliderChangedTimestamp by remember { mutableStateOf(0L) }
+
         Slider(
             value = sliderValue,
             onValueChange = {
                 sliderValue = it
                 sliderChangedTimestamp = System.currentTimeMillis()
+                isSliderMoving = true  // Cambia el estado para indicar que el slider se está moviendo
             },
             valueRange = 0f..100f,
             modifier = Modifier.fillMaxWidth(),
             colors = SliderDefaults.colors(
-                thumbColor = Color(0xFF0E172F),
-                activeTrackColor = Color(0xFF069606),
-                inactiveTrackColor = Color.Gray
+                thumbColor = if (isSliderMoving) Color(0xFFAAAAAA) else Color(0xFF0E172F),  // Cambia el color de la burbuja
+                activeTrackColor = if (isSliderMoving) Color(0xFFAAAAAA) else Color(0xFF069606),  // Cambia el color de la parte activa
+                inactiveTrackColor = Color.Gray  // Color de la parte no seleccionada
             ),
             onValueChangeFinished = {
-                // Llamar a la función refactorizada con una lista de estados de los dedos
+                // Llamar a la función cuando el slider deja de moverse
                 EnviarComandosMovimiento(
                     estadosDedos = listOf(
                         estaPulsadoMenique,
@@ -548,13 +553,16 @@ fun PantallaPrincipal(
                     maxAngleValues = maxAngleValues,
                     sendCommand = ::sendCommand
                 )
+
+                // Cambia el estado para indicar que el slider dejó de moverse
+                isSliderMoving = false
             }
         )
 
 
         // Mostrar el valor actual del slider
         Text(
-            String.format("%.2f", sliderValue),
+            String.format("%.0f%%", sliderValue),
         )
 
         // Mostrar el valor del slider cuando se presiona un botón de dedo
