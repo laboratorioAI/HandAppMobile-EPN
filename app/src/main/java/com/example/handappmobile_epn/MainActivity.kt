@@ -34,8 +34,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.Help
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -66,6 +70,7 @@ import androidx.core.app.ActivityCompat
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material.icons.filled.Help
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -73,6 +78,7 @@ import androidx.compose.ui.unit.sp
 import com.example.handappmobile_epn.ui.theme.HandAppMobileEPNTheme
 import java.io.IOException
 import java.util.UUID
+import kotlinx.coroutines.delay
 
 
 
@@ -172,7 +178,7 @@ fun PantallaPrincipal(
             Toast.makeText(context, "No tiene los permisos de conexión Bluetooth.", Toast.LENGTH_LONG).show()
         }
     }
-    6
+
     // Verificar si se cuenta con los permisos de bluetooth
     val isPermissionGranted = ActivityCompat.checkSelfPermission(
         context,
@@ -248,9 +254,8 @@ fun PantallaPrincipal(
             Button(
                 onClick = { mostrarPantallaTutorial = true },
                 modifier = Modifier
-                    .size(30.dp) // Hacer el botón circular
+                    .size(30.dp) // Tamaño
                     .align(Alignment.CenterVertically), // Alinear verticalmente dentro de la fila
-                shape = CircleShape, // Hacer que el botón tenga forma circular
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0E172F)),
                 contentPadding = PaddingValues(0.dp) // Eliminar el padding interno del botón
             ) {
@@ -259,7 +264,7 @@ fun PantallaPrincipal(
                     contentDescription = "Ayuda",
                     tint = Color.White,
                     modifier = Modifier
-                        .fillMaxSize() // Hacer que el ícono llene todo el botón
+                        .fillMaxSize() // Hacer que el ícono llene el botón completo
                 )
             }
         }
@@ -468,31 +473,19 @@ fun PantallaPrincipal(
                             "Pulgar Inferior" -> {
                                 estaPulsadoPulgarInferior = estado
                                 // Para la asignacion del comando
-                                if (estaPulsadoPulgarInferior) indices.add(4)
-                                else indices.removeIf { it == 4 }
+                                if (estaPulsadoPulgarInferior) indices.add(5)
+                                else indices.removeIf { it == 5 }
                             }
                             "Pulgar Superior" -> {
                                 estaPulsadoPulgarSuperior = estado
                                 // Para la asignacion del comando
-                                if (estaPulsadoPulgarSuperior) indices.add(5)
-                                else indices.removeIf { it == 5 }
+                                if (estaPulsadoPulgarSuperior) indices.add(4)
+                                else indices.removeIf { it == 4 }
                             }
                         }
                         fingerName = nombre
                         sliderValueDisplay = sliderValue
 
-                        // Si se ha activado el estado entonces se envia el comando
-                        if (estado) {
-                            indices.forEach { i ->
-                                // Se envia el comando por bluetooth
-                                var valorMovimiento = (maxAngleValues.get(i) * (sliderValue/100.0f)).toInt()
-                                if (valorMovimiento != lastSliderValues.get(i)) {
-                                    lastSliderValues.set(i, valorMovimiento)
-                                    val command = codesString.get(i).toString() + valorMovimiento.toString() + "\n"
-                                    sendCommand(command)
-                                }
-                            }
-                        }
                     }
                 )
             } else if (estaSeleccionadaFlexibleB2) {
@@ -532,17 +525,94 @@ fun PantallaPrincipal(
         ///////////////////
         /* Slider */
         ///////////////////
+        var lastSliderValue by remember { mutableStateOf(sliderValue) }
+        var shouldSendCommand by remember { mutableStateOf(false) }
+        var sliderChangedTimestamp by remember { mutableStateOf(System.currentTimeMillis()) }
+
+        // Función que envía los comandos si el valor del slider no ha cambiado en 1 segundo
+        fun enviarComandosSiEsNecesario() {
+            if (estaPulsadoMenique) {
+                val valorMovimiento = (maxAngleValues[0] * (sliderValue / 100.0f)).toInt()
+                if (valorMovimiento != lastSliderValues[0]) {
+                    lastSliderValues[0] = valorMovimiento
+                    val command = codesString[0] + valorMovimiento.toString() + "\n"
+                    sendCommand(command)
+                }
+            }
+
+            if (estaPulsadoAnular) {
+                val valorMovimiento = (maxAngleValues[1] * (sliderValue / 100.0f)).toInt()
+                if (valorMovimiento != lastSliderValues[1]) {
+                    lastSliderValues[1] = valorMovimiento
+                    val command = codesString[1] + valorMovimiento.toString() + "\n"
+                    sendCommand(command)
+                }
+            }
+
+            if (estaPulsadoMedio) {
+                val valorMovimiento = (maxAngleValues[2] * (sliderValue / 100.0f)).toInt()
+                if (valorMovimiento != lastSliderValues[2]) {
+                    lastSliderValues[2] = valorMovimiento
+                    val command = codesString[2] + valorMovimiento.toString() + "\n"
+                    sendCommand(command)
+                }
+            }
+
+            if (estaPulsadoIndice) {
+                val valorMovimiento = (maxAngleValues[3] * (sliderValue / 100.0f)).toInt()
+                if (valorMovimiento != lastSliderValues[3]) {
+                    lastSliderValues[3] = valorMovimiento
+                    val command = codesString[3] + valorMovimiento.toString() + "\n"
+                    sendCommand(command)
+                }
+            }
+
+            if (estaPulsadoPulgarInferior) {
+                val valorMovimiento = (maxAngleValues[5] * (sliderValue / 100.0f)).toInt()
+                if (valorMovimiento != lastSliderValues[5]) {
+                    lastSliderValues[5] = valorMovimiento
+                    val command = codesString[5] + valorMovimiento.toString() + "\n"
+                    sendCommand(command)
+                }
+            }
+
+            if (estaPulsadoPulgarSuperior) {
+                val valorMovimiento = (maxAngleValues[4] * (sliderValue / 100.0f)).toInt()
+                if (valorMovimiento != lastSliderValues[4]) {
+                    lastSliderValues[4] = valorMovimiento
+                    val command = codesString[4] + valorMovimiento.toString() + "\n"
+                    sendCommand(command)
+                }
+            }
+        }
+
         Slider(
             value = sliderValue,
-            onValueChange = { sliderValue = it },
+            onValueChange = { newValue ->
+                sliderValue = newValue
+                shouldSendCommand = true // Se marca que se debe enviar el comando
+                sliderChangedTimestamp = System.currentTimeMillis() // Actualiza la marca de tiempo del cambio de slider
+            },
             valueRange = 0f..100f,
             modifier = Modifier.fillMaxWidth(),
             colors = SliderDefaults.colors(
-                thumbColor = Color(0xFF0E172F),         // Color del círculo del deslizador
-                activeTrackColor = Color(0xFF069606),   // Color de la barra activa
-                inactiveTrackColor = Color.Gray              // Color de la barra inactiva
+                thumbColor = Color(0xFF0E172F),
+                activeTrackColor = Color(0xFF069606),
+                inactiveTrackColor = Color.Gray
             )
         )
+
+        LaunchedEffect(sliderChangedTimestamp) {
+            // Verifica si ha pasado 1 segundo sin cambios en el slider
+            delay(1000L)
+            if (System.currentTimeMillis() - sliderChangedTimestamp >= 1000L) {
+                shouldSendCommand = false
+                enviarComandosSiEsNecesario()
+            }
+        }
+
+
+
         // Mostrar el valor actual del slider
         Text(
             String.format("%.2f", sliderValue),
@@ -619,6 +689,8 @@ fun PantallaPrincipal(
     }
 }
 
+
+
 /* Creación de los botones de la mano */
 @Composable
 fun LogicaBotonesMano(sliderValue: Float, onDedoPulsado: (String, Boolean) -> Unit) {
@@ -677,7 +749,6 @@ fun MostrarImagen(mostrar: Boolean, imagenRes: Int, offsetX: Dp, offsetY: Dp, wi
     }
 }
 
-
 @Composable
 fun PantallaTutorial(onDismiss: () -> Unit) {
     // Declarar el array de 5 elementos con lambdas que invocan composables
@@ -722,9 +793,18 @@ fun PantallaTutorial(onDismiss: () -> Unit) {
                                 onClick = {
                                 if (posicionActual > 0) posicionActual--
                             },
+                                modifier = Modifier
+                                    .width(60.dp)  // Ancho del botón
+                                    .height(40.dp), // Alto del botón
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(0xFF0E172F))) {
-                                Text("<-")
+                                    containerColor = Color(0xFF0E172F)),
+                                contentPadding = PaddingValues(0.dp))  { // Eliminar el padding interno del botón
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = "Flecha Izquierda",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(20.dp)
+                                )
                             }
                         }
 
@@ -734,9 +814,18 @@ fun PantallaTutorial(onDismiss: () -> Unit) {
                                 onClick = {
                                 if (posicionActual < ventanasTutorial.size - 1) posicionActual++
                             },
+                                modifier = Modifier
+                                    .width(60.dp)  // Ancho del botón
+                                    .height(40.dp), // Alto del botón
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(0xFF0E172F))) {
-                                Text("->")
+                                    containerColor = Color(0xFF0E172F)),
+                                contentPadding = PaddingValues(0.dp))  { // Eliminar el padding interno del botón
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                    contentDescription = "Flecha Derecha",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(20.dp)
+                                )
                             }
                         }
                     }
