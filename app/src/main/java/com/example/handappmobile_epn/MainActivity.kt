@@ -33,13 +33,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.Help
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -69,18 +66,11 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
-import androidx.compose.material.icons.filled.Help
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.sp
 import com.example.handappmobile_epn.ui.theme.HandAppMobileEPNTheme
 import java.io.IOException
 import java.util.UUID
-import kotlinx.coroutines.delay
-
-
 
 
 // aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -525,73 +515,14 @@ fun PantallaPrincipal(
         ///////////////////
         /* Slider */
         ///////////////////
-        var lastSliderValue by remember { mutableStateOf(sliderValue) }
-        var shouldSendCommand by remember { mutableStateOf(false) }
         var sliderChangedTimestamp by remember { mutableStateOf(System.currentTimeMillis()) }
 
-        // Función que envía los comandos si el valor del slider no ha cambiado en 1 segundo
-        fun enviarComandosSiEsNecesario() {
-            if (estaPulsadoMenique) {
-                val valorMovimiento = (maxAngleValues[0] * (sliderValue / 100.0f)).toInt()
-                if (valorMovimiento != lastSliderValues[0]) {
-                    lastSliderValues[0] = valorMovimiento
-                    val command = codesString[0] + valorMovimiento.toString() + "\n"
-                    sendCommand(command)
-                }
-            }
-
-            if (estaPulsadoAnular) {
-                val valorMovimiento = (maxAngleValues[1] * (sliderValue / 100.0f)).toInt()
-                if (valorMovimiento != lastSliderValues[1]) {
-                    lastSliderValues[1] = valorMovimiento
-                    val command = codesString[1] + valorMovimiento.toString() + "\n"
-                    sendCommand(command)
-                }
-            }
-
-            if (estaPulsadoMedio) {
-                val valorMovimiento = (maxAngleValues[2] * (sliderValue / 100.0f)).toInt()
-                if (valorMovimiento != lastSliderValues[2]) {
-                    lastSliderValues[2] = valorMovimiento
-                    val command = codesString[2] + valorMovimiento.toString() + "\n"
-                    sendCommand(command)
-                }
-            }
-
-            if (estaPulsadoIndice) {
-                val valorMovimiento = (maxAngleValues[3] * (sliderValue / 100.0f)).toInt()
-                if (valorMovimiento != lastSliderValues[3]) {
-                    lastSliderValues[3] = valorMovimiento
-                    val command = codesString[3] + valorMovimiento.toString() + "\n"
-                    sendCommand(command)
-                }
-            }
-
-            if (estaPulsadoPulgarInferior) {
-                val valorMovimiento = (maxAngleValues[5] * (sliderValue / 100.0f)).toInt()
-                if (valorMovimiento != lastSliderValues[5]) {
-                    lastSliderValues[5] = valorMovimiento
-                    val command = codesString[5] + valorMovimiento.toString() + "\n"
-                    sendCommand(command)
-                }
-            }
-
-            if (estaPulsadoPulgarSuperior) {
-                val valorMovimiento = (maxAngleValues[4] * (sliderValue / 100.0f)).toInt()
-                if (valorMovimiento != lastSliderValues[4]) {
-                    lastSliderValues[4] = valorMovimiento
-                    val command = codesString[4] + valorMovimiento.toString() + "\n"
-                    sendCommand(command)
-                }
-            }
-        }
-
+        // Función que envía los comandos cuando el slider termina de moverse
         Slider(
             value = sliderValue,
-            onValueChange = { newValue ->
-                sliderValue = newValue
-                shouldSendCommand = true // Se marca que se debe enviar el comando
-                sliderChangedTimestamp = System.currentTimeMillis() // Actualiza la marca de tiempo del cambio de slider
+            onValueChange = {
+                sliderValue = it
+                sliderChangedTimestamp = System.currentTimeMillis()
             },
             valueRange = 0f..100f,
             modifier = Modifier.fillMaxWidth(),
@@ -599,18 +530,26 @@ fun PantallaPrincipal(
                 thumbColor = Color(0xFF0E172F),
                 activeTrackColor = Color(0xFF069606),
                 inactiveTrackColor = Color.Gray
-            )
-        )
-
-        LaunchedEffect(sliderChangedTimestamp) {
-            // Verifica si ha pasado 1 segundo sin cambios en el slider
-            delay(1000L)
-            if (System.currentTimeMillis() - sliderChangedTimestamp >= 1000L) {
-                shouldSendCommand = false
-                enviarComandosSiEsNecesario()
+            ),
+            onValueChangeFinished = {
+                // Llamar a la función refactorizada con una lista de estados de los dedos
+                EnviarComandosMovimiento(
+                    estadosDedos = listOf(
+                        estaPulsadoMenique,
+                        estaPulsadoAnular,
+                        estaPulsadoMedio,
+                        estaPulsadoIndice,
+                        estaPulsadoPulgarSuperior,
+                        estaPulsadoPulgarInferior
+                    ),
+                    sliderValue = sliderValue,
+                    lastSliderValues = lastSliderValues,
+                    codesString = codesString,
+                    maxAngleValues = maxAngleValues,
+                    sendCommand = ::sendCommand
+                )
             }
-        }
-
+        )
 
 
         // Mostrar el valor actual del slider
@@ -689,6 +628,31 @@ fun PantallaPrincipal(
     }
 }
 
+/* Función no composable que envía los valores de movimiento en caso de que esté pulsado un dedo */
+fun EnviarComandosMovimiento(
+    estadosDedos: List<Boolean>,
+    sliderValue: Float,
+    lastSliderValues: MutableList<Int>,
+    codesString: MutableList<String>,
+    maxAngleValues: MutableList<Float>,
+    sendCommand: (String) -> Unit
+) {
+    // Iterar a través de los estados de los dedos
+    for (i in estadosDedos.indices) {
+        if (estadosDedos[i]) {
+            // Calcular el valor del movimiento
+            val valorMovimiento = (maxAngleValues[i] * (sliderValue / 100.0f)).toInt()
+            // Si el valor ha cambiado desde la última vez
+            if (valorMovimiento != lastSliderValues[i]) {
+                lastSliderValues[i] = valorMovimiento
+                // Crear el comando a enviar
+                val command = codesString[i] + valorMovimiento.toString() + "\n"
+                // Enviar el comando
+                sendCommand(command)
+            }
+        }
+    }
+}
 
 
 /* Creación de los botones de la mano */
