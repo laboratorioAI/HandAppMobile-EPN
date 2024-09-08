@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material3.Button
@@ -149,9 +148,8 @@ fun HomeScreen(
             Button(
                 onClick = botonTutorial,
                 modifier = Modifier
-                    .size(30.dp) // Hacer el botón circular
+                    .size(30.dp) // Tamaño
                     .align(Alignment.CenterVertically), // Alinear verticalmente dentro de la fila
-                shape = CircleShape, // Hacer que el botón tenga forma circular
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0E172F)),
                 contentPadding = PaddingValues(0.dp) // Eliminar el padding interno del botón
             ) {
@@ -160,7 +158,7 @@ fun HomeScreen(
                     contentDescription = "Ayuda",
                     tint = Color.White,
                     modifier = Modifier
-                        .fillMaxSize() // Hacer que el ícono llene todo el botón
+                        .fillMaxSize() // Hacer que el ícono llene el botón completo
                 )
             }
         }
@@ -279,31 +277,18 @@ fun HomeScreen(
                 "Pulgar Inferior" -> {
                     estaPulsadoPulgarInferior = estado
                     // Para la asignacion del comando
-                    if (estaPulsadoPulgarInferior) indices.add(4)
-                    else indices.removeIf { it == 4 }
+                    if (estaPulsadoPulgarInferior) indices.add(5)
+                    else indices.removeIf { it == 5 }
                 }
                 "Pulgar Superior" -> {
                     estaPulsadoPulgarSuperior = estado
                     // Para la asignacion del comando
-                    if (estaPulsadoPulgarSuperior) indices.add(5)
-                    else indices.removeIf { it == 5 }
+                    if (estaPulsadoPulgarSuperior) indices.add(4)
+                    else indices.removeIf { it == 4 }
                 }
             }
             fingerName = nombre
             sliderValueDisplay = sliderValue
-
-            // Si se ha activado el estado entonces se envia el comando
-            if (estado) {
-                indices.forEach { i ->
-                    // Se envia el comando por bluetooth
-                    var valorMovimiento = (maxAngleValues.get(i) * (sliderValue/100.0f)).toInt()
-                    if (valorMovimiento != lastSliderValues.get(i)) {
-                        lastSliderValues.set(i, valorMovimiento)
-                        val command: String = codesString.get(i).toString() + valorMovimiento.toString() + "\n"
-                        bluetoothConnectionManager.sendCommand(command)
-                    }
-                }
-            }
         }
         val habilitarMano: Boolean = estaSeleccionadaHandiEpn || estaSeleccionadaFlexibleB2
         var funcionSeleccionada: (String, Boolean) -> Unit = {_, _ -> }
@@ -329,20 +314,55 @@ fun HomeScreen(
         ///////////////////
         /* Slider */
         ///////////////////
+        //var sliderChangedTimestamp by remember { mutableStateOf(System.currentTimeMillis()) }
+
+        // Función que envía los comandos cuando el slider termina de moverse
+        var isSliderMoving by remember { mutableStateOf(false) }
+        var sliderValue by remember { mutableStateOf(0f) }
+        var sliderChangedTimestamp by remember { mutableStateOf(0L) }
+
         Slider(
             value = sliderValue,
-            onValueChange = { sliderValue = it },
+            onValueChange = {
+                sliderValue = it
+                sliderChangedTimestamp = System.currentTimeMillis()
+                isSliderMoving = true  // Cambia el estado para indicar que el slider se está moviendo
+            },
             valueRange = 0f..100f,
             modifier = Modifier.fillMaxWidth(),
             colors = SliderDefaults.colors(
-                thumbColor = Color(0xFF0E172F),         // Color del círculo del deslizador
-                activeTrackColor = Color(0xFF069606),   // Color de la barra activa
-                inactiveTrackColor = Color.Gray              // Color de la barra inactiva
-            )
+                thumbColor = if (isSliderMoving) Color(0xFFAAAAAA) else Color(0xFF0E172F),  // Cambia el color de la burbuja
+                activeTrackColor = if (isSliderMoving) Color(0xFFAAAAAA) else Color(0xFF069606),  // Cambia el color de la parte activa
+                inactiveTrackColor = Color.Gray  // Color de la parte no seleccionada
+            ),
+            onValueChangeFinished = {
+                // Referencia a la función sendCommand
+                val sendCommand: (String) -> Unit = bluetoothConnectionManager::sendCommand
+
+                // Llamar a la función cuando el slider deja de moverse
+                EnviarComandosMovimiento(
+                    estadosDedos = listOf(
+                        estaPulsadoMenique,
+                        estaPulsadoAnular,
+                        estaPulsadoMedio,
+                        estaPulsadoIndice,
+                        estaPulsadoPulgarSuperior,
+                        estaPulsadoPulgarInferior
+                    ),
+                    sliderValue = sliderValue,
+                    lastSliderValues = lastSliderValues,
+                    codesString = codesString,
+                    maxAngleValues = maxAngleValues,
+                    sendCommand = sendCommand
+                )
+
+                // Cambia el estado para indicar que el slider dejó de moverse
+                isSliderMoving = false
+            }
         )
         // Mostrar el valor actual del slider
         Text(
-            String.format("%.2f", sliderValue),
+            String.format("%.0f%%", sliderValue),
         )
 
         // Mostrar el valor del slider cuando se presiona un botón de dedo
@@ -397,6 +417,32 @@ fun HomeScreen(
             )
         ) {
             Text(text = "OK")
+        }
+    }
+}
+
+/* Función no composable que envía los valores de movimiento en caso de que esté pulsado un dedo */
+fun EnviarComandosMovimiento(
+    estadosDedos: List<Boolean>,
+    sliderValue: Float,
+    lastSliderValues: MutableList<Int>,
+    codesString: MutableList<String>,
+    maxAngleValues: MutableList<Float>,
+    sendCommand: (String) -> Unit
+) {
+    // Iterar a través de los estados de los dedos
+    for (i in estadosDedos.indices) {
+        if (estadosDedos[i]) {
+            // Calcular el valor del movimiento
+            val valorMovimiento = (maxAngleValues[i] * (sliderValue / 100.0f)).toInt()
+            // Si el valor ha cambiado desde la última vez
+            if (valorMovimiento != lastSliderValues[i]) {
+                lastSliderValues[i] = valorMovimiento
+                // Crear el comando a enviar
+                val command = codesString[i] + valorMovimiento.toString() + "\n"
+                // Enviar el comando
+                sendCommand(command)
+            }
         }
     }
 }
