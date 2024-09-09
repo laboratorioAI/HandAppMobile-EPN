@@ -56,26 +56,33 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.handappmobile_epn.R
 import com.example.handappmobile_epn.bt.BluetoothConnectionManager
-import com.example.handappmobile_epn.ui.screen.HomeScreen
+import com.example.handappmobile_epn.navigation.AppScreens
+import com.example.handappmobile_epn.ui.screen.HomeContentScreen
 import kotlinx.coroutines.launch
 
 @Composable
-fun DrawerScreen(bluetoothConnectionManager: BluetoothConnectionManager) {
+fun HomeDrawerScreen(
+    navController: NavController,
+    bluetoothConnectionManager: BluetoothConnectionManager)
+{
     var drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
     ModalNavigationDrawer(
         drawerState = drawerState,
-        drawerContent = { DrawerContent() },
-        content = { ScaffoldContent(bluetoothConnectionManager = bluetoothConnectionManager, drawerState) }
+        drawerContent = { HomeDrawerContent(navController) },
+        content = { HomeScaffoldContent(bluetoothConnectionManager = bluetoothConnectionManager, drawerState) }
     )
 }
 
-@Preview
 @Composable
-fun DrawerContent() {
+fun HomeDrawerContent(navController: NavController) {
     val logo = painterResource(id = R.drawable.logocircular)
+
+    val inicioOnClick = { /*TODO*/ }
+    val devicesOnClick = { navController.navigate(AppScreens.DevicesScreen.route) }
 
     Column(modifier = Modifier
         .background(colorResource(id = R.color.white))
@@ -107,19 +114,19 @@ fun DrawerContent() {
             )
         }
 
-        MenuItem(text = "Inicio", icon = Icons.Filled.Home, onClick = { /*TODO*/ })
-        MenuItem(text = "Dispositivos", icon = Icons.Filled.Bluetooth, onClick = { /*TODO*/ })
-        MenuItem(text = "Tutorial", icon = Icons.Filled.HelpOutline, onClick = { /*TODO*/ })
+        HomeMenuItem(text = "Inicio", icon = Icons.Filled.Home, onClick = inicioOnClick)
+        HomeMenuItem(text = "Dispositivos", icon = Icons.Filled.Bluetooth, onClick = devicesOnClick)
+        HomeMenuItem(text = "Tutorial", icon = Icons.Filled.HelpOutline, onClick = { /*TODO*/ })
 
         HorizontalDivider()
 
-        MenuItem(text = "Ajustes", icon = Icons.Filled.Settings, onClick = { /*TODO*/ })
-        MenuItem(text = "Acerca de", icon = Icons.Filled.Info, onClick = { /*TODO*/ })
+        HomeMenuItem(text = "Ajustes", icon = Icons.Filled.Settings, onClick = { /*TODO*/ })
+        HomeMenuItem(text = "Acerca de", icon = Icons.Filled.Info, onClick = { /*TODO*/ })
     }
 }
 
 @Composable
-fun MenuItem(
+fun HomeMenuItem(
     text: String,
     icon: ImageVector,
     onClick: () -> Unit
@@ -132,15 +139,15 @@ fun MenuItem(
 }
 
 @Composable
-fun ScaffoldContent(bluetoothConnectionManager: BluetoothConnectionManager, drawerState: DrawerState) {
+fun HomeScaffoldContent(bluetoothConnectionManager: BluetoothConnectionManager, drawerState: DrawerState) {
     Scaffold(modifier = Modifier.fillMaxSize(),
-        topBar = { ToolBar(drawerState) }
+        topBar = { HomeToolBar(drawerState) }
     ) { innerPadding ->
 
         Column(
             modifier = Modifier.verticalScroll(rememberScrollState())
         ) {
-            HomeScreen(
+            HomeContentScreen(
                 bluetoothConnectionManager,
                 modifier = Modifier.padding(innerPadding)
             )
@@ -150,7 +157,7 @@ fun ScaffoldContent(bluetoothConnectionManager: BluetoothConnectionManager, draw
 }
 
 @Composable
-fun ToolBar(drawerState: DrawerState) {
+fun HomeToolBar(drawerState: DrawerState) {
     var showMenuRight by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 

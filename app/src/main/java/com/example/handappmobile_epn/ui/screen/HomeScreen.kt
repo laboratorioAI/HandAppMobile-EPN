@@ -36,12 +36,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.handappmobile_epn.bt.BluetoothConnectionManager
 import com.example.handappmobile_epn.bt.BluetoothHelper
+import com.example.handappmobile_epn.navigation.AppScreens
 import com.example.handappmobile_epn.ui.components.HandController
+import com.example.handappmobile_epn.ui.components.HomeDrawerScreen
+import com.example.handappmobile_epn.ui.components.ViewContainer
 
 @Composable
 fun HomeScreen(
+    navController: NavController,
+    bluetoothConnectionManager: BluetoothConnectionManager
+) {
+    ViewContainer(bluetoothConnectionManager = bluetoothConnectionManager) {
+        HomeDrawerScreen(navController = navController, bluetoothConnectionManager = bluetoothConnectionManager)
+    }
+}
+
+@Composable
+fun HomeContentScreen(
     bluetoothConnectionManager: BluetoothConnectionManager,
     modifier: Modifier = Modifier
 ) {
