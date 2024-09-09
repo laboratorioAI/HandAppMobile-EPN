@@ -39,7 +39,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.handappmobile_epn.bt.BluetoothConnectionManager
 import com.example.handappmobile_epn.bt.BluetoothHelper
-import com.example.handappmobile_epn.navigation.AppScreens
 import com.example.handappmobile_epn.ui.components.HandController
 import com.example.handappmobile_epn.ui.components.HomeDrawerScreen
 import com.example.handappmobile_epn.ui.components.ViewContainer
@@ -62,9 +61,16 @@ fun HomeContentScreen(
     // Accediendo al contexto de la actividad
     val context = LocalContext.current
 
-    var lastSliderValues = remember { mutableStateListOf(0, 0, 0, 0, 0, 0) }
-    var codesString = remember { mutableStateListOf("A", "B", "C", "D", "E", "F") }
-    val maxAngleValues = remember { mutableStateListOf(380.0f, 380.0f, 400.0f, 400.0f, 400.0f, 200.0f) }
+    // Variables para definir el movimiento de la mano HANDI_EPN
+    var lastSliderValuesHandiEPN = remember { mutableStateListOf(0, 0, 0, 0, 0, 0) }
+    var codesStringHandiEPN = remember { mutableStateListOf("A", "B", "C", "D", "E", "F") }
+    val maxAngleValuesHandiEPN = remember { mutableStateListOf(380.0f, 380.0f, 400.0f, 400.0f, 400.0f, 200.0f) }
+
+    //DEL 0 AL FF
+    // Variables para definir el movimiento de la mano FLEXIBLE_V2
+    var lastSliderValuesFlexibleV2 = remember { mutableStateListOf(0, 0, 0, 0) }
+    var codesStringFlexibleV2 = remember { mutableStateListOf("A", "B", "C", "D") }
+    val maxAngleValuesFlexibleV2 = remember { mutableStateListOf(255.0f, 255.0f, 255.0f, 255.0f) }
 
     // booleano para comprobar si el bluetooth está conectado
     var estaConectadoBluetooth by remember { mutableStateOf(false) }
@@ -94,7 +100,7 @@ fun HomeContentScreen(
 
     // Comprobar la mano seleccionada para moverse
     var estaSeleccionadaHandiEpn by remember { mutableStateOf(false) }
-    var estaSeleccionadaFlexibleB2 by remember { mutableStateOf(false) }
+    var estaSeleccionadaFlexibleV2 by remember { mutableStateOf(false) }
 
     // Declarar el estado para mostrar la pantalla de tutorial
     var mostrarPantallaTutorial by remember { mutableStateOf(false) }
@@ -215,7 +221,6 @@ fun HomeContentScreen(
                     expanded = expanded,
                     onDismissRequest = { expanded = false }
                 ) {
-                    val devices = listOf("HANDI_EPN", "FLEXIBLE_B2") // Lista de dispositivos
                     val pairedDevices = BluetoothHelper.getPairedDevices(context,
                         bluetoothConnectionManager.getBluetoothAdapter())
 
@@ -240,10 +245,10 @@ fun HomeContentScreen(
                                     // Cambia los booleanos dependiendo del dispositivo seleccionado
                                     if (item.toString() == "STALIN_BT_AUX" || item.toString() == "HANDI_EPN") {
                                         estaSeleccionadaHandiEpn = true
-                                        estaSeleccionadaFlexibleB2 = false
-                                    } else if (item.toString() == "FLEXIBLE_B2") {
+                                        estaSeleccionadaFlexibleV2 = false
+                                    } else if (item.toString() == "FLEXIBLE_V2") {
                                         estaSeleccionadaHandiEpn = false
-                                        estaSeleccionadaFlexibleB2 = true
+                                        estaSeleccionadaFlexibleV2 = true
                                     }
 
                                     // Y segundo intenta conectarse con el dispositivo
@@ -256,8 +261,6 @@ fun HomeContentScreen(
                 }
             }
         }
-
-
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -288,28 +291,66 @@ fun HomeContentScreen(
                     if (estaPulsadoIndice) indices.add(3)
                     else indices.removeIf { it == 3 }
                 }
-                "Pulgar Inferior" -> {
-                    estaPulsadoPulgarInferior = estado
-                    // Para la asignacion del comando
-                    if (estaPulsadoPulgarInferior) indices.add(5)
-                    else indices.removeIf { it == 5 }
-                }
                 "Pulgar Superior" -> {
                     estaPulsadoPulgarSuperior = estado
                     // Para la asignacion del comando
                     if (estaPulsadoPulgarSuperior) indices.add(4)
                     else indices.removeIf { it == 4 }
                 }
+                "Pulgar Inferior" -> {
+                    estaPulsadoPulgarInferior = estado
+                    // Para la asignacion del comando
+                    if (estaPulsadoPulgarInferior) indices.add(5)
+                    else indices.removeIf { it == 5 }
+                }
             }
             fingerName = nombre
             sliderValueDisplay = sliderValue
         }
-        val habilitarMano: Boolean = estaSeleccionadaHandiEpn || estaSeleccionadaFlexibleB2
+
+        val funcionFlexibleV2: (String, Boolean) -> Unit = { nombre, estado ->
+            var indices = mutableStateListOf<Int>()
+            when (nombre) {
+                "Meñique", "Anular" -> {
+                    estaPulsadoMenique = estado
+                    estaPulsadoAnular = estado
+                    if (estado && !indices.contains(0)){
+                        indices.add(0)  // SOlo agrega el índice una vez
+                    }
+                    else if (!estado) {
+                        indices.removeIf { it == 0 }
+                    }
+                }
+                "Medio" -> {
+                    estaPulsadoMedio = estado
+                    if (estado) indices.add(1)
+                    else indices.removeIf { it == 1 }
+                }
+                "Índice" -> {
+                    estaPulsadoIndice = estado
+                    if (estado) indices.add(2)
+                    else indices.removeIf { it == 2 }
+                }
+                "Pulgar Inferior", "Pulgar Superior" -> {
+                    estaPulsadoPulgarInferior = estado
+                    estaPulsadoPulgarSuperior = estado
+                    if (estado && !indices.contains(3)) {
+                        indices.add(3) // Solo agrega el índice una vez
+                    } else if (!estado) {
+                        indices.removeIf { it == 3 }
+                    }
+                }
+            }
+            fingerName = nombre
+            sliderValueDisplay = sliderValue
+        }
+
+        val habilitarMano: Boolean = estaSeleccionadaHandiEpn || estaSeleccionadaFlexibleV2
         var funcionSeleccionada: (String, Boolean) -> Unit = {_, _ -> }
         if (estaSeleccionadaHandiEpn) {
             funcionSeleccionada = funcionHandiEpn
-        } else if (estaSeleccionadaFlexibleB2) {
-            funcionSeleccionada = funcionHandiEpn
+        } else if (estaSeleccionadaFlexibleV2) {
+            funcionSeleccionada = funcionFlexibleV2
         }
         ///////////////////
         /* Imagen y dedos */
@@ -328,7 +369,6 @@ fun HomeContentScreen(
         ///////////////////
         /* Slider */
         ///////////////////
-        //var sliderChangedTimestamp by remember { mutableStateOf(System.currentTimeMillis()) }
 
         // Función que envía los comandos cuando el slider termina de moverse
         var isSliderMoving by remember { mutableStateOf(false) }
@@ -353,23 +393,43 @@ fun HomeContentScreen(
                 // Referencia a la función sendCommand
                 val sendCommand: (String) -> Unit = bluetoothConnectionManager::sendCommand
 
-                // Llamar a la función cuando el slider deja de moverse
-                EnviarComandosMovimiento(
-                    estadosDedos = listOf(
-                        estaPulsadoMenique,
-                        estaPulsadoAnular,
-                        estaPulsadoMedio,
-                        estaPulsadoIndice,
-                        estaPulsadoPulgarSuperior,
-                        estaPulsadoPulgarInferior
-                    ),
-                    sliderValue = sliderValue,
-                    lastSliderValues = lastSliderValues,
-                    codesString = codesString,
-                    maxAngleValues = maxAngleValues,
-                    sendCommand = sendCommand
-                )
+                // Llamar a la función cuando el slider deja de moverse para HANDI_EPN
+                if (estaSeleccionadaHandiEpn){
+                    EnviarComandosMovimiento(
+                        estadosDedos = listOf(
+                            estaPulsadoMenique,
+                            estaPulsadoAnular,
+                            estaPulsadoMedio,
+                            estaPulsadoIndice,
+                            estaPulsadoPulgarSuperior,
+                            estaPulsadoPulgarInferior
+                        ),
+                        sliderValue = sliderValue,
+                        lastSliderValues = lastSliderValuesHandiEPN,
+                        codesString = codesStringHandiEPN,
+                        maxAngleValues = maxAngleValuesHandiEPN,
+                        sendCommand = sendCommand
+                    )
+                }
 
+                if (estaSeleccionadaFlexibleV2) {
+                    EnviarComandosMovimiento(
+                        estadosDedos = listOf(
+                            estaPulsadoMenique,
+                            estaPulsadoAnular,
+                            estaPulsadoMedio,
+                            estaPulsadoIndice,
+                            estaPulsadoPulgarSuperior,
+                            estaPulsadoPulgarInferior
+                        ),
+                        sliderValue = sliderValue,
+                        lastSliderValues = lastSliderValuesFlexibleV2,
+                        codesString = codesStringFlexibleV2,
+                        maxAngleValues = maxAngleValuesFlexibleV2,  // Mantener los valores como Float
+                        sendCommand = sendCommand,
+                        useHex = false  // Indicar que se use hexadecimal
+                    )
+                }
                 // Cambia el estado para indicar que el slider dejó de moverse
                 isSliderMoving = false
             }
@@ -442,18 +502,22 @@ fun EnviarComandosMovimiento(
     lastSliderValues: MutableList<Int>,
     codesString: MutableList<String>,
     maxAngleValues: MutableList<Float>,
-    sendCommand: (String) -> Unit
+    sendCommand: (String) -> Unit,
+    useHex: Boolean = false // Verificar si se están usando hexadecimales
 ) {
-    // Iterar a través de los estados de los dedos
     for (i in estadosDedos.indices) {
         if (estadosDedos[i]) {
-            // Calcular el valor del movimiento
             val valorMovimiento = (maxAngleValues[i] * (sliderValue / 100.0f)).toInt()
-            // Si el valor ha cambiado desde la última vez
             if (valorMovimiento != lastSliderValues[i]) {
                 lastSliderValues[i] = valorMovimiento
+                // Convertir a hexadecimal si es necesario
+                val valorMovimientoStr = if (useHex) {
+                    valorMovimiento.toString(16).uppercase().padStart(2, '0') //corregir
+                } else {
+                    valorMovimiento.toString()
+                }
                 // Crear el comando a enviar
-                val command = codesString[i] + valorMovimiento.toString() + "\n"
+                val command = codesString[i] + valorMovimientoStr + "\n"
                 // Enviar el comando
                 sendCommand(command)
             }
