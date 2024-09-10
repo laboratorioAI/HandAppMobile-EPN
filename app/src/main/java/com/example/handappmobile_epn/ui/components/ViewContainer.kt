@@ -9,7 +9,6 @@ import com.example.handappmobile_epn.ui.theme.HandAppMobileEPNTheme
 
 @Composable
 fun ViewContainer(
-    bluetoothConnectionManager: BluetoothConnectionManager,
     content: @Composable () -> Unit)
 {
     HandAppMobileEPNTheme {
@@ -18,7 +17,6 @@ fun ViewContainer(
                 background = Color(0xFFFFFFFF) //Blanco
             )
         ) {
-            // HomeDrawerScreen(bluetoothConnectionManager)
             content()
         }
     }

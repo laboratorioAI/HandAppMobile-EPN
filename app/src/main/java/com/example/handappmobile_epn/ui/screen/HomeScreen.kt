@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material3.Button
@@ -35,30 +37,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.handappmobile_epn.bt.BluetoothConnectionManager
 import com.example.handappmobile_epn.bt.BluetoothHelper
-import com.example.handappmobile_epn.navigation.AppScreens
 import com.example.handappmobile_epn.ui.components.HandController
-import com.example.handappmobile_epn.ui.components.HomeDrawerScreen
+import com.example.handappmobile_epn.ui.components.MenuLateralScreen
 import com.example.handappmobile_epn.ui.components.ViewContainer
 
+@Preview(showBackground = true)
 @Composable
-fun HomeScreen(
-    navController: NavController,
-    bluetoothConnectionManager: BluetoothConnectionManager
-) {
-    ViewContainer(bluetoothConnectionManager = bluetoothConnectionManager) {
-        HomeDrawerScreen(navController = navController, bluetoothConnectionManager = bluetoothConnectionManager)
-    }
+fun HomeScreenPreview() {
+    HomeScreen(
+        bluetoothConnectionManager = BluetoothConnectionManager(null)
+    )
 }
 
 @Composable
-fun HomeContentScreen(
-    bluetoothConnectionManager: BluetoothConnectionManager,
-    modifier: Modifier = Modifier
-) {
+fun HomeScreen(bluetoothConnectionManager: BluetoothConnectionManager) {
     // Accediendo al contexto de la actividad
     val context = LocalContext.current
 
@@ -133,7 +130,9 @@ fun HomeContentScreen(
 
     // Creación de un bloque vertical de elementos
     Column(
-        modifier = modifier.padding(10.dp),
+        modifier = Modifier
+            .padding(paddingValues = PaddingValues(10.dp, 0.dp))
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(

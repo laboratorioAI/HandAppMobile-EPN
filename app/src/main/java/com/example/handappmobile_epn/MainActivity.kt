@@ -8,14 +8,23 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.lightColorScheme
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.rememberNavController
 import com.example.handappmobile_epn.bt.BluetoothConnectionManager
 import com.example.handappmobile_epn.bt.BluetoothHelper
 import com.example.handappmobile_epn.navigation.AppNavigation
-import com.example.handappmobile_epn.ui.components.HomeDrawerScreen
+import com.example.handappmobile_epn.ui.components.MenuLateralScreen
+import com.example.handappmobile_epn.ui.components.ViewContainer
+import com.example.handappmobile_epn.ui.screen.DevicesScreen
+import com.example.handappmobile_epn.ui.screen.HomeScreen
 import com.example.handappmobile_epn.ui.screen.PantallaTutorial
 import com.example.handappmobile_epn.ui.theme.HandAppMobileEPNTheme
 
@@ -38,7 +47,9 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
         setContent {
-            AppNavigation(bluetoothConnectionManager)
+            ViewContainer() {
+                MenuLateralScreen(bluetoothConnectionManager)
+            }
         }
     }
 }
