@@ -68,9 +68,9 @@ fun HomeContentScreen(
 
     //DEL 0 AL FF
     // Variables para definir el movimiento de la mano FLEXIBLE_V2
-    var lastSliderValuesFlexibleV2 = remember { mutableStateListOf(0, 0, 0, 0) }
-    var codesStringFlexibleV2 = remember { mutableStateListOf("A", "B", "C", "D") }
-    val maxAngleValuesFlexibleV2 = remember { mutableStateListOf(255.0f, 255.0f, 255.0f, 255.0f) }
+    var lastSliderValuesFlexibleV2 = remember { mutableStateListOf(0, 0, 0, 0, 0, 0) }
+    var codesStringFlexibleV2 = remember { mutableStateListOf("A", "A", "B", "C", "D", "D") }
+    val maxAngleValuesFlexibleV2 = remember { mutableStateListOf(255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f) }
 
     // booleano para comprobar si el bluetooth está conectado
     var estaConectadoBluetooth by remember { mutableStateOf(false) }
@@ -122,19 +122,37 @@ fun HomeContentScreen(
         sliderValue = 0f // Ajusta el slider al mínimo
 
         /* Ingresar aquí la funcionalidad del botón */
-        bluetoothConnectionManager.sendCommand("O")
+        if(estaSeleccionadaHandiEpn){
+            bluetoothConnectionManager.sendCommand("O")
+        }
+        if(estaSeleccionadaFlexibleV2){
+            bluetoothConnectionManager.sendCommand("O:")
+        }
+
     }
     val botonCerrarMano = {
         sliderValue = 100f // Ajusta el slider al máximo
 
         /* Ingresar aquí la funcionalidad del botón */
-        bluetoothConnectionManager.sendCommand("C")
+        if(estaSeleccionadaHandiEpn){
+            bluetoothConnectionManager.sendCommand("C")
+        }
+        if(estaSeleccionadaFlexibleV2){
+            bluetoothConnectionManager.sendCommand("C:")
+        }
+
     }
     val botonOK = {
         sliderValue = 0f // Ajusta el slider al mínimo
 
         /* Ingresar aquí la funcionalidad del botón */
-        bluetoothConnectionManager.sendCommand("P")
+        if(estaSeleccionadaHandiEpn){
+            bluetoothConnectionManager.sendCommand("P")
+        }
+        if(estaSeleccionadaFlexibleV2){
+            bluetoothConnectionManager.sendCommand("S:")
+        }
+
     }
 
     // Creación de un bloque vertical de elementos
@@ -246,7 +264,7 @@ fun HomeContentScreen(
                                     if (item.toString() == "STALIN_BT_AUX" || item.toString() == "HANDI_EPN") {
                                         estaSeleccionadaHandiEpn = true
                                         estaSeleccionadaFlexibleV2 = false
-                                    } else if (item.toString() == "FLEXIBLE_V2") {
+                                    } else if (item.toString() == "Prosthesis_EPN_v2") {
                                         estaSeleccionadaHandiEpn = false
                                         estaSeleccionadaFlexibleV2 = true
                                     }
@@ -427,7 +445,7 @@ fun HomeContentScreen(
                         codesString = codesStringFlexibleV2,
                         maxAngleValues = maxAngleValuesFlexibleV2,  // Mantener los valores como Float
                         sendCommand = sendCommand,
-                        useHex = false  // Indicar que se use hexadecimal
+                        useHex = true  // Indicar que se use hexadecimal
                     )
                 }
                 // Cambia el estado para indicar que el slider dejó de moverse
@@ -503,7 +521,7 @@ fun EnviarComandosMovimiento(
     codesString: MutableList<String>,
     maxAngleValues: MutableList<Float>,
     sendCommand: (String) -> Unit,
-    useHex: Boolean = false // Verificar si se están usando hexadecimales
+    useHex: Boolean = false
 ) {
     for (i in estadosDedos.indices) {
         if (estadosDedos[i]) {
@@ -512,7 +530,8 @@ fun EnviarComandosMovimiento(
                 lastSliderValues[i] = valorMovimiento
                 // Convertir a hexadecimal si es necesario
                 val valorMovimientoStr = if (useHex) {
-                    valorMovimiento.toString(16).uppercase().padStart(2, '0') //corregir
+                    valorMovimiento.coerceIn(0, 255) // Limitar el valor a 8 bits (0-255)
+                        .toString(16).uppercase().padStart(2, '0') // Convertir a hexadecimal y rellenar con ceros
                 } else {
                     valorMovimiento.toString()
                 }
@@ -524,3 +543,4 @@ fun EnviarComandosMovimiento(
         }
     }
 }
+
