@@ -4,6 +4,7 @@ package com.example.handappmobile_epn.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -48,6 +49,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -72,6 +74,8 @@ import com.example.handappmobile_epn.R
 import com.example.handappmobile_epn.bt.BluetoothConnectionManager
 import com.example.handappmobile_epn.navigation.AppNavigation
 import com.example.handappmobile_epn.navigation.AppScreens
+import com.example.handappmobile_epn.ui.screen.PantallaTutorial
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.launch
 
 @Composable
@@ -102,9 +106,23 @@ fun MenuLateralContent(navController: NavController, drawerState: DrawerState) {
         mutableStateOf(0)
     }
 
+    var mostrarPantallaTutorial by remember { mutableStateOf(false) }
+    if (mostrarPantallaTutorial) {
+        PantallaTutorial(onDismiss = { mostrarPantallaTutorial = false })
+    }
+
+    // Crear el controlador para modificar las barras de sistema
+    val systemUiController = rememberSystemUiController()
+
+    // Cambiar el color de la barra de estado
+    systemUiController.setStatusBarColor(
+        color = colorResource(id = R.color.app_dark_bg), // Color de la barra de estado
+        darkIcons = false // No se usan iconos oscuros
+    )
+
     ModalDrawerSheet(
         modifier = Modifier.width(300.dp),
-        drawerContainerColor = DrawerDefaults.containerColor
+        drawerContainerColor = colorResource(id = R.color.app_basic_bg)
     )
     {
         MenuLateralHeader()
@@ -119,6 +137,21 @@ fun MenuLateralContent(navController: NavController, drawerState: DrawerState) {
                     selectedItemIndex = index
                     scope.launch {
                         drawerState.close()
+
+                        val route = item.route
+                        if (navController.currentBackStackEntry?.destination?.route != route) {
+                            navController.navigate(route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                        // Se agrega una funcionalidad exclusiva para detectar la ventana tutorial
+                        if (route == AppScreens.TutorialScreen.route) {
+                            mostrarPantallaTutorial = true
+                        }
                     }
                 },
                 icon = {
@@ -128,110 +161,21 @@ fun MenuLateralContent(navController: NavController, drawerState: DrawerState) {
                         contentDescription = item.title
                     )
                 },
-                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                colors = NavigationDrawerItemDefaults.colors(
+                    selectedContainerColor = Color(0x0F000000),
+                    selectedIconColor = colorResource(id = R.color.black),
+                    selectedTextColor = colorResource(id = R.color.black),
+                    unselectedContainerColor = colorResource(id = R.color.app_basic_bg),
+                    unselectedIconColor = colorResource(id = R.color.black),
+                    unselectedTextColor = colorResource(id = R.color.black)
+                )
+
             )
         }
     }
-
-//    Column(modifier = Modifier
-//        .background(colorResource(id = R.color.white))
-//        .fillMaxHeight()
-//        .width(300.dp)
-//    ) {
-//        Row(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .background(colorResource(id = R.color.app_dark))
-//                .padding(16.dp)
-//                .padding(
-//                    top = WindowInsets.systemBars
-//                        .asPaddingValues()
-//                        .calculateTopPadding()
-//                ),
-//            verticalAlignment = Alignment.CenterVertically
-//        ) {
-//            Image(
-//                painter = logo,
-//                contentDescription = "App Logo",
-//                modifier = Modifier.size(40.dp)
-//            )
-//            Spacer(modifier = Modifier.width(16.dp))
-//            Text(
-//                text = "Hand App",
-//                style = MaterialTheme.typography.titleLarge,
-//                color = Color.White
-//            )
-//        }
-//
-//        MenuItem(text = "Inicio", icon = Icons.Filled.Home, onClick = {
-//            scope.launch {
-//                drawerState.close()
-//                val route = AppScreens.HomeScreen.route
-//                if (navController.currentBackStackEntry?.destination?.route != route) {
-//                    navController.navigate(route) {
-//                        popUpTo(navController.graph.findStartDestination().id) {
-//                            saveState = true
-//                        }
-//                        launchSingleTop = true
-//                        restoreState = true
-//                    }
-//                }
-//            }
-//        })
-//        MenuItem(text = "Dispositivos", icon = Icons.Filled.Bluetooth, onClick = {
-//            scope.launch {
-//                drawerState.close()
-//                val route = AppScreens.DevicesScreen.route
-//                if (navController.currentBackStackEntry?.destination?.route != route) {
-//                    navController.navigate(route) {
-//                        popUpTo(navController.graph.findStartDestination().id) {
-//                            saveState = true
-//                        }
-//                        launchSingleTop = true
-//                        restoreState = true
-//                    }
-//                }
-//            }
-//        })
-//        MenuItem(text = "Tutorial", icon = Icons.Filled.HelpOutline, onClick = { /*TODO*/ })
-//
-//        HorizontalDivider()
-//
-//        MenuItem(text = "Ajustes", icon = Icons.Filled.Settings, onClick = {
-//            scope.launch {
-//                drawerState.close()
-//                val route = AppScreens.SettingsScreen.route
-//                if (navController.currentBackStackEntry?.destination?.route != route) {
-//                    navController.navigate(route) {
-//                        popUpTo(navController.graph.findStartDestination().id) {
-//                            saveState = true
-//                        }
-//                        launchSingleTop = true
-//                        restoreState = true
-//                    }
-//                }
-//            }
-//        })
-//        MenuItem(text = "Acerca de", icon = Icons.Filled.Info, onClick = {
-//            scope.launch {
-//                drawerState.close()
-//                val route = AppScreens.AboutScreen.route
-//                if (navController.currentBackStackEntry?.destination?.route != route) {
-//                    navController.navigate(route) {
-//                        popUpTo(navController.graph.findStartDestination().id) {
-//                            saveState = true
-//                        }
-//                        launchSingleTop = true
-//                        restoreState = true
-//                    }
-//                }
-//            }
-//        })
-//    }
-
 }
 
-@Preview
 @Composable
 fun MenuLateralHeader() {
     val logo = painterResource(id = R.drawable.logocircular)
@@ -259,19 +203,6 @@ fun MenuLateralHeader() {
 }
 
 @Composable
-fun MenuItem(
-    text: String,
-    icon: ImageVector,
-    onClick: () -> Unit
-) {
-    TextButton(onClick = onClick) {
-        Icon(icon, contentDescription = text)
-        Spacer(modifier = Modifier.width(32.dp))
-        Text(text = text)
-    }
-}
-
-@Composable
 fun MenuScaffoldContent(
     navController: NavHostController,
     drawerState: DrawerState,
@@ -280,17 +211,27 @@ fun MenuScaffoldContent(
     Scaffold(modifier = Modifier.fillMaxSize(),
         topBar = { MenuToolBar(drawerState) }
     ) { innerPadding ->
-        /*TODO*/
-        Column(modifier = Modifier.padding(innerPadding))
-        {  }
-
-        AppNavigation(navController, bluetoothConnectionManager)
-
+        Box(modifier = Modifier.fillMaxSize().padding(innerPadding))
+        {
+            AppNavigation(navController, bluetoothConnectionManager)
+        }
     }
 }
 
+@Preview
 @Composable
-fun MenuToolBar(drawerState: DrawerState) {
+fun PruebaPreview() {
+    MenuScaffoldContent(
+        navController = rememberNavController(),
+        drawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
+        bluetoothConnectionManager = BluetoothConnectionManager(null)
+    )
+}
+
+@Composable
+fun MenuToolBar(
+    drawerState: DrawerState)
+{
     var showMenuRight by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
@@ -303,7 +244,7 @@ fun MenuToolBar(drawerState: DrawerState) {
             actionIconContentColor = colorResource(id = R.color.white)
         ),
         navigationIcon = {
-            IconButton(onClick = { /*TODO*/scope.launch { drawerState.open() } }) {
+            IconButton(onClick = { scope.launch { drawerState.open() } }) {
                 Icon(Icons.Filled.Menu, contentDescription = "Menu")
             }
         },

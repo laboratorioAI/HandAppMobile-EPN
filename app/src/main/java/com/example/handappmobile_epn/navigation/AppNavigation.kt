@@ -16,6 +16,7 @@ fun AppNavigation(navController: NavHostController, bluetoothConnectionManager: 
     NavHost(navController = navController, startDestination = AppScreens.HomeScreen.route) {
         composable(AppScreens.HomeScreen.route) { HomeScreen(bluetoothConnectionManager) }
         composable(AppScreens.DevicesScreen.route) { DevicesScreen(bluetoothConnectionManager) }
+        composable(AppScreens.TutorialScreen.route) { HomeScreen(bluetoothConnectionManager) }
         composable(AppScreens.SettingsScreen.route) { SettingsScreen() }
         composable(AppScreens.AboutScreen.route) { AboutScreen() }
     }
