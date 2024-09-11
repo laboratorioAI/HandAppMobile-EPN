@@ -91,11 +91,11 @@ fun HandButtons(onDedoPulsado: (String, Boolean) -> Unit) {
 @Composable
 fun LogicaBotonesMano(onDedoPulsado: (String, Boolean) -> Unit) {
     // Botones y lógica de HandiEpn aquí
-    BotonDedo("Pulgar Superior", 260.dp, 200.dp, -45f, 90.dp, 40.dp, onDedoPulsado)
-    BotonDedo("Pulgar Inferior", 200.dp, 270.dp, -45f, 90.dp, 40.dp, onDedoPulsado)
-    BotonDedo("Índice", 130.dp, 120.dp, -70f, 200.dp, 35.dp, onDedoPulsado)
-    BotonDedo("Medio", 50.dp, 90.dp, 90f, 230.dp, 35.dp, onDedoPulsado)
-    BotonDedo("Anular", 0.dp, 90.dp, 75f, 200.dp, 35.dp, onDedoPulsado)
+    BotonDedo("Pulgar Superior", 270.dp, 210.dp, -45f, 90.dp, 40.dp, onDedoPulsado)
+    BotonDedo("Pulgar Inferior", 210.dp, 280.dp, -45f, 90.dp, 40.dp, onDedoPulsado)
+    BotonDedo("Índice", 140.dp, 120.dp, -70f, 200.dp, 35.dp, onDedoPulsado)
+    BotonDedo("Medio", 60.dp, 90.dp, 90f, 230.dp, 35.dp, onDedoPulsado)
+    BotonDedo("Anular", 10.dp, 90.dp, 75f, 200.dp, 35.dp, onDedoPulsado)
     BotonDedo("Meñique", (-30).dp, 140.dp, 55f, 160.dp, 35.dp, onDedoPulsado)
 }
 
