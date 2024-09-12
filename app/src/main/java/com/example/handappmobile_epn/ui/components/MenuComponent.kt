@@ -97,18 +97,12 @@ fun MenuLateralContent(navController: NavController, drawerState: DrawerState) {
     val items: List<AppScreens> = listOf(
         AppScreens.HomeScreen,
         AppScreens.DevicesScreen,
-        AppScreens.TutorialScreen,
         AppScreens.SettingsScreen,
         AppScreens.AboutScreen
     )
     val scope = rememberCoroutineScope()
     var selectedItemIndex by rememberSaveable {
         mutableStateOf(0)
-    }
-
-    var mostrarPantallaTutorial by remember { mutableStateOf(false) }
-    if (mostrarPantallaTutorial) {
-        PantallaTutorial(onDismiss = { mostrarPantallaTutorial = false })
     }
 
     // Crear el controlador para modificar las barras de sistema
@@ -147,10 +141,6 @@ fun MenuLateralContent(navController: NavController, drawerState: DrawerState) {
                                 launchSingleTop = true
                                 restoreState = true
                             }
-                        }
-                        // Se agrega una funcionalidad exclusiva para detectar la ventana tutorial
-                        if (route == AppScreens.TutorialScreen.route) {
-                            mostrarPantallaTutorial = true
                         }
                     }
                 },
@@ -211,7 +201,9 @@ fun MenuScaffoldContent(
     Scaffold(modifier = Modifier.fillMaxSize(),
         topBar = { MenuToolBar(drawerState) }
     ) { innerPadding ->
-        Box(modifier = Modifier.fillMaxSize().padding(innerPadding))
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding))
         {
             AppNavigation(navController, bluetoothConnectionManager)
         }
@@ -232,7 +224,11 @@ fun PruebaPreview() {
 fun MenuToolBar(
     drawerState: DrawerState)
 {
-    var showMenuRight by remember { mutableStateOf(false) }
+    var mostrarPantallaTutorial by remember { mutableStateOf(false) }
+    if (mostrarPantallaTutorial) {
+        PantallaTutorial(onDismiss = { mostrarPantallaTutorial = false })
+    }
+
     val scope = rememberCoroutineScope()
 
     TopAppBar(
@@ -249,21 +245,10 @@ fun MenuToolBar(
             }
         },
         actions = {
-            IconButton(onClick = { showMenuRight = !showMenuRight }) {
-                Icon(Icons.Filled.MoreVert, contentDescription = "More")
-            }
-
-            DropdownMenu(
-                expanded = showMenuRight,
-                onDismissRequest = { showMenuRight = false }
-            ) {
-                DropdownMenuItem(
-                    text = { Text("Ajustes") },
-                    onClick = { /*TODO*/ }
-                )
-                DropdownMenuItem(
-                    text = { Text("Actualizar") },
-                    onClick = { /*TODO*/ }
+            IconButton(onClick = { mostrarPantallaTutorial = true }) {
+                Icon(
+                    painter = painterResource(id = R.drawable.app_unselected_tutorial),
+                    contentDescription = "Tutorial"
                 )
             }
         }
