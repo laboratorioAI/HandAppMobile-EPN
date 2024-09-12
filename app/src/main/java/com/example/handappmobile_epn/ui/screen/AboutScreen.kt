@@ -235,7 +235,7 @@ fun AboutScreen() {
         // Version Text
         Text(
             text = "versión 1.0.0",
-            fontSize = 12.sp,
+            fontSize = 14.sp,
             color = Color.Gray,
             modifier = Modifier.padding(16.dp)
         )

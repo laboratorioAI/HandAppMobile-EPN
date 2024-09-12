@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Help
@@ -38,10 +39,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -50,6 +53,7 @@ import androidx.navigation.NavController
 import com.example.handappmobile_epn.R
 import com.example.handappmobile_epn.bt.BluetoothConnectionManager
 import com.example.handappmobile_epn.bt.BluetoothHelper
+import com.example.handappmobile_epn.navigation.AppScreens
 import com.example.handappmobile_epn.ui.components.HandController
 import com.example.handappmobile_epn.ui.components.MenuLateralScreen
 import com.example.handappmobile_epn.ui.components.ViewContainer
@@ -177,7 +181,7 @@ fun HomeScreen(bluetoothConnectionManager: BluetoothConnectionManager) {
             )
         }
 
-        Spacer(modifier = Modifier.height(30.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         val funcionHandiEpn: (String, Boolean) -> Unit = { nombre, estado ->
             var indices = mutableStateListOf<Int>()
@@ -281,6 +285,26 @@ fun HomeScreen(bluetoothConnectionManager: BluetoothConnectionManager) {
             onDedoPulsado = funcionSeleccionada
         )
 
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+
+
+        Box(
+            modifier = Modifier
+                .height(40.dp)
+                .clip(RoundedCornerShape(22.dp))  // Curvatura de las esquinas
+                .background(colorResource(id = R.color.app_dark))
+                .padding(12.dp, 0.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Palma mano derecha",
+                fontSize = 14.sp,
+                color = Color.White
+            )
+        }
+
         ///////////////////
         /* Slider */
         ///////////////////
@@ -289,8 +313,6 @@ fun HomeScreen(bluetoothConnectionManager: BluetoothConnectionManager) {
         var isSliderMoving by remember { mutableStateOf(false) }
         var sliderValue by remember { mutableStateOf(0f) }
         var sliderChangedTimestamp by remember { mutableStateOf(0L) }
-
-        Spacer(modifier = Modifier.height(20.dp))
 
         Slider(
             value = sliderValue,
@@ -359,7 +381,7 @@ fun HomeScreen(bluetoothConnectionManager: BluetoothConnectionManager) {
             String.format("%.0f%%", sliderValue),
         )
 
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         ///////////////////////////
         /* Botones abrir, cerrar y OK */
