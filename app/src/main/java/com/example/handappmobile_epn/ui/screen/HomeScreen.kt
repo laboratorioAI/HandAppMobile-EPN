@@ -2,6 +2,8 @@ package com.example.handappmobile_epn.ui.screen
 
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,10 +13,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Help
@@ -35,24 +39,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.handappmobile_epn.R
 import com.example.handappmobile_epn.bt.BluetoothConnectionManager
 import com.example.handappmobile_epn.bt.BluetoothHelper
+import com.example.handappmobile_epn.navigation.AppScreens
 import com.example.handappmobile_epn.ui.components.HandController
 import com.example.handappmobile_epn.ui.components.MenuLateralScreen
 import com.example.handappmobile_epn.ui.components.ViewContainer
-
-@Preview(showBackground = true)
-@Composable
-fun HomeScreenPreview() {
-    HomeScreen(
-        bluetoothConnectionManager = BluetoothConnectionManager(null)
-    )
-}
+import com.example.handappmobile_epn.ui.theme.HandAppMobileEPNTheme
 
 @Composable
 fun HomeScreen(bluetoothConnectionManager: BluetoothConnectionManager) {
@@ -138,10 +143,10 @@ fun HomeScreen(bluetoothConnectionManager: BluetoothConnectionManager) {
         if(estaSeleccionadaFlexibleV2){
             bluetoothConnectionManager.sendCommand("C:")
         }
-
     }
     val botonOK = {
         sliderValue = 0f // Ajusta el slider al mínimo
+
 
         /* Ingresar aquí la funcionalidad del botón */
         if(estaSeleccionadaHandiEpn){
@@ -156,131 +161,27 @@ fun HomeScreen(bluetoothConnectionManager: BluetoothConnectionManager) {
     // Creación de un bloque vertical de elementos
     Column(
         modifier = Modifier
-            .padding(paddingValues = PaddingValues(10.dp, 0.dp))
+            .padding(paddingValues = PaddingValues(0.dp, 0.dp))
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Row(
+        // Caja para imprimir el nombre del dispositivo cuando esté conectado
+        Box(
             modifier = Modifier
-                .fillMaxWidth() // Ocupa el ancho disponible completo
-                .padding(bottom = 28.dp),
-            horizontalArrangement = Arrangement.SpaceBetween // Alinea los elementos en extremos
+                .fillMaxWidth()
+                .height(40.dp)
+                .background(colorResource(id = R.color.app_secondary))
+                .padding(0.dp),
+            contentAlignment = Alignment.Center
         ) {
-
-            // Spacer para ajustar el espacio entre el texto y el botón
-            Spacer(modifier = Modifier.width(16.dp))
-
-            // Box para centrar el texto
-            Box(
-                modifier = Modifier
-                    .weight(1f) // Ocupa el espacio disponible
-                    .align(Alignment.CenterVertically) // Centrar verticalmente
-            ) {
-                Text(
-                    text = "HAND APP EPN",
-                    modifier = Modifier.align(Alignment.Center) // Centrar el texto horizontalmente
-                )
-            }
-
-            // Botón circular en la esquina superior derecha
-            Button(
-                onClick = botonTutorial,
-                modifier = Modifier
-                    .size(30.dp) // Tamaño
-                    .align(Alignment.CenterVertically), // Alinear verticalmente dentro de la fila
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0E172F)),
-                contentPadding = PaddingValues(0.dp) // Eliminar el padding interno del botón
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.Help,
-                    contentDescription = "Ayuda",
-                    tint = Color.White,
-                    modifier = Modifier
-                        .fillMaxSize() // Hacer que el ícono llene el botón completo
-                )
-            }
+            Text(
+                text = "Dispositivo",
+                color = Color.Black,
+                fontSize = 18.sp
+            )
         }
 
-        // Mostrar la PantallaTutorial cuando se activa
-        if (mostrarPantallaTutorial) {
-            PantallaTutorial(onDismiss = { mostrarPantallaTutorial = false })
-        }
-
-        // Creación de un bloque horizontal de elementos
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            ///////////////////////////
-            /* Botones de bluetooth */
-            //////////////////////////
-            Button(
-                onClick = botonActivarBluetooth,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (estaConectadoBluetooth) Color(0xFF069606) else Color(
-                        0xFFAA0A32
-                    )
-                )
-            ) {
-                Text(text = "Activar Bluetooth")
-            }
-
-            Spacer(modifier = Modifier.width(20.dp))
-
-            // DropdownMenu para elegir conexión Bluetooth
-            Box (modifier = Modifier.width(150.dp)){
-
-                TextButton(
-                    onClick = {
-                        expanded = true
-                    },
-                    colors = ButtonDefaults.textButtonColors(contentColor = Color(0xFF022779))
-                ) {
-                    Text(selectedOption)
-                }
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
-                    val pairedDevices = BluetoothHelper.getPairedDevices(context,
-                        bluetoothConnectionManager.getBluetoothAdapter())
-
-                    val addressDevices: ArrayAdapter<String>? = pairedDevices?.first
-                    val nameDevices: ArrayAdapter<String>? = pairedDevices?.second
-
-                    nameDevices?.let { array ->
-                        for (i in 0 until array.count) {
-                            val item = array.getItem(i)
-                            DropdownMenuItem(
-                                text = {
-                                    Text(item.toString())
-                                },
-                                onClick = {
-                                    // Primero guarda la direccion y muestra el nombre como texto
-                                    // ----------------------------------------------------------
-                                    val auxAddress: String = addressDevices?.getItem(i).toString()
-
-                                    selectedOption = item.toString() // Asigna el nombre del dispositivo seleccionado
-                                    expanded = false
-
-                                    // Cambia los booleanos dependiendo del dispositivo seleccionado
-                                    if (item.toString() == "STALIN_BT_AUX" || item.toString() == "HANDI_EPN") {
-                                        estaSeleccionadaHandiEpn = true
-                                        estaSeleccionadaFlexibleV2 = false
-                                    } else if (item.toString() == "Prosthesis_EPN_v2") {
-                                        estaSeleccionadaHandiEpn = false
-                                        estaSeleccionadaFlexibleV2 = true
-                                    }
-
-                                    // Y segundo intenta conectarse con el dispositivo
-                                    // ----------------------------------------------------------
-                                    bluetoothConnectionManager.connectToDevice(auxAddress)
-                                }
-                            )
-                        }
-                    }
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         val funcionHandiEpn: (String, Boolean) -> Unit = { nombre, estado ->
             var indices = mutableStateListOf<Int>()
@@ -384,6 +285,26 @@ fun HomeScreen(bluetoothConnectionManager: BluetoothConnectionManager) {
             onDedoPulsado = funcionSeleccionada
         )
 
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+
+
+        Box(
+            modifier = Modifier
+                .height(40.dp)
+                .clip(RoundedCornerShape(22.dp))  // Curvatura de las esquinas
+                .background(colorResource(id = R.color.app_dark))
+                .padding(12.dp, 0.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Palma mano derecha",
+                fontSize = 14.sp,
+                color = Color.White
+            )
+        }
+
         ///////////////////
         /* Slider */
         ///////////////////
@@ -401,11 +322,13 @@ fun HomeScreen(bluetoothConnectionManager: BluetoothConnectionManager) {
                 isSliderMoving = true  // Cambia el estado para indicar que el slider se está moviendo
             },
             valueRange = 0f..100f,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().padding(paddingValues = PaddingValues(10.dp, 0.dp)),
             colors = SliderDefaults.colors(
-                thumbColor = if (isSliderMoving) Color(0xFFAAAAAA) else Color(0xFF0E172F),  // Cambia el color de la burbuja
-                activeTrackColor = if (isSliderMoving) Color(0xFFAAAAAA) else Color(0xFF069606),  // Cambia el color de la parte activa
-                inactiveTrackColor = Color.Gray  // Color de la parte no seleccionada
+                thumbColor = if (isSliderMoving) colorResource(id = R.color.app_dark)
+                else colorResource(id = R.color.app_green),  // Cambia el color de la burbuja
+                activeTrackColor = if (isSliderMoving) colorResource(id = R.color.app_dark)
+                else colorResource(id = R.color.app_green),  // Cambia el color de la parte activa
+                inactiveTrackColor = colorResource(id = R.color.app_dark)  // Color de la parte no seleccionada
             ),
             onValueChangeFinished = {
                 // Referencia a la función sendCommand
@@ -452,17 +375,13 @@ fun HomeScreen(bluetoothConnectionManager: BluetoothConnectionManager) {
                 isSliderMoving = false
             }
         )
+
         // Mostrar el valor actual del slider
         Text(
             String.format("%.0f%%", sliderValue),
         )
 
-        // Mostrar el valor del slider cuando se presiona un botón de dedo
-        Text(
-            text = "Valor del slider al presionar el dedo: ${String.format("%.2f", sliderValueDisplay)}"
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         ///////////////////////////
         /* Botones abrir, cerrar y OK */
@@ -473,43 +392,47 @@ fun HomeScreen(bluetoothConnectionManager: BluetoothConnectionManager) {
             // Botón para abrir la mano
             Button(onClick = botonAbrirMano,
                 modifier = Modifier
-                    .size(width = 140.dp, 40.dp),
+                    .size(width = 100.dp, 40.dp),
 
                 colors = ButtonDefaults.buttonColors(
-                    containerColor =  Color(0xFF0E172F)
+                    colorResource(id = R.color.app_primary)
                 )
             ) {
-                Text(text = "Abrir Mano")
+                Text(text = "Abrir")
             }
 
-            Spacer(modifier = Modifier.width(30.dp))
+            Spacer(modifier = Modifier.width(20.dp))
+
+            // Botón señal "OK"
+            Button(onClick = botonOK,
+                modifier = Modifier
+                    .size(width = 100.dp, 40.dp),
+
+                colors = ButtonDefaults.buttonColors(
+                    colorResource(id = R.color.app_primary)
+                )
+            ) {
+                Text(text = "OK")
+            }
+
+            Spacer(modifier = Modifier.width(20.dp))
 
             // Botón para cerrar la mano
             Button(onClick = botonCerrarMano,
                 modifier = Modifier
-                    .size(width = 140.dp, 40.dp),
+                    .size(width = 100.dp, 40.dp),
 
                 colors = ButtonDefaults.buttonColors(
-                    containerColor =  Color(0xFF0E172F)
+                    colorResource(id = R.color.app_primary)
                 )
             ) {
-                Text(text = "Cerrar Mano")
+                Text(text = "Cerrar")
             }
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(30.dp))
 
-        // Botón señal "OK"
-        Button(onClick = botonOK,
-            modifier = Modifier
-                .size(width = 310.dp, 40.dp),
 
-            colors = ButtonDefaults.buttonColors(
-                containerColor =  Color(0xFF0E172F)
-            )
-        ) {
-            Text(text = "OK")
-        }
     }
 }
 
@@ -543,4 +466,3 @@ fun EnviarComandosMovimiento(
         }
     }
 }
-
