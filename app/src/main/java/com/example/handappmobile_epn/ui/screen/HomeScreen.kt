@@ -112,7 +112,7 @@ fun HomeScreen(bluetoothConnectionManager: BluetoothConnectionManager) {
             Toast.makeText(context, "Bluetooth ya se encuentra encendido.", Toast.LENGTH_LONG).show()
         } else {
             estaConectadoBluetooth = false
-            val r = bluetoothConnectionManager.bluetoothOn(context)
+            // val r = bluetoothConnectionManager.bluetoothOn(context)
             // pendiente hacer algo con el resultado
         }
     }

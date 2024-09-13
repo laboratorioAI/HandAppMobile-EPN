@@ -1,14 +1,19 @@
 package com.example.handappmobile_epn.bt
 
+import android.Manifest
+import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.util.Log
 import android.widget.ArrayAdapter
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.runtime.Composable
 
 
 object BluetoothHelper {
@@ -42,39 +47,26 @@ object BluetoothHelper {
             android.Manifest.permission.BLUETOOTH,
             android.Manifest.permission.BLUETOOTH_ADMIN,
             android.Manifest.permission.BLUETOOTH_CONNECT,
-            android.Manifest.permission.BLUETOOTH_SCAN,
-            android.Manifest.permission.ACCESS_FINE_LOCATION,
-            android.Manifest.permission.ACCESS_COARSE_LOCATION
+            android.Manifest.permission.BLUETOOTH_SCAN
         )
         return permissions.all { perm ->
             ActivityCompat.checkSelfPermission(context, perm) == PackageManager.PERMISSION_GRANTED
         }
     }
 
-    fun requestBluetoothPermissions(
-        activity: ComponentActivity,
-        onPermissionsResult: (Boolean) -> Unit
-    ) {
-        val permissions = arrayOf(
-            android.Manifest.permission.BLUETOOTH,
-            android.Manifest.permission.BLUETOOTH_ADMIN,
-            android.Manifest.permission.BLUETOOTH_CONNECT,
-            android.Manifest.permission.BLUETOOTH_SCAN,
-            android.Manifest.permission.ACCESS_FINE_LOCATION,
-            android.Manifest.permission.ACCESS_COARSE_LOCATION
-        )
-        val requestPermissionLauncher = activity.registerForActivityResult(
-            ActivityResultContracts.RequestMultiplePermissions()
-        ) { permissionsResult ->
-            val allGranted = permissionsResult.all { it.value }
-            onPermissionsResult(allGranted)
-        }
-
-        requestPermissionLauncher.launch(permissions)
-    }
-
     fun isBluetoothSupported(bluetoothAdapter: BluetoothAdapter?): Boolean {
         return bluetoothAdapter != null
+    }
+
+    @Composable
+    fun BluetoothOffComposable(
+        onResult: (Boolean) -> Unit)
+    {
+        val disableBtIntent = Intent("android.bluetooth.adapter.action.REQUEST_DISABLE")
+        val bluetoothOffLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            onResult(result.resultCode == Activity.RESULT_OK)
+        }
+        bluetoothOffLauncher.launch(disableBtIntent)
     }
 
 }

@@ -1,13 +1,20 @@
 package com.example.handappmobile_epn.bt
 
+import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
 import java.io.IOException
 import java.util.UUID
+import androidx.activity.ComponentActivity
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 
 class BluetoothConnectionManager(private val bluetoothAdapter: BluetoothAdapter?) {
 
@@ -68,28 +75,6 @@ class BluetoothConnectionManager(private val bluetoothAdapter: BluetoothAdapter?
 
     fun getBluetoothAdapter(): BluetoothAdapter? {
         return this.bluetoothAdapter
-    }
-
-    fun bluetoothOn(context: Context): Boolean {
-        return try {
-            if (BluetoothHelper.checkBluetoothPermissions(context)) {
-                // Encender Bluetooth
-                val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-                context.startActivity(enableBtIntent)
-            }
-            true
-        } catch (se: SecurityException)
-        {
-            se.printStackTrace()
-            isConnected = false
-            Log.e("BluetoothConnectionManager", "Error de seguridad - Permisos Bluetooth no concedidos", se)
-            false
-        } catch (e: Exception) {
-            e.printStackTrace()
-            isConnected = false
-            Log.e("BluetoothConnectionManager", "Error al encender bluetooth", e)
-            false
-        }
     }
 
     fun isBluetoothOn(): Boolean {

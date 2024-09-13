@@ -1,11 +1,18 @@
 package com.example.handappmobile_epn.ui.screen
 
+import android.app.Activity
+import android.bluetooth.BluetoothAdapter
+import android.content.Intent
+import android.util.Log
+import android.widget.ArrayAdapter
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -15,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -23,11 +31,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.handappmobile_epn.R
 import com.example.handappmobile_epn.bt.BluetoothConnectionManager
+import com.example.handappmobile_epn.bt.BluetoothHelper
 
 @Composable
 fun DevicesScreen(bluetoothConnectionManager: BluetoothConnectionManager)
 {
+    val context = LocalContext.current
     var isBluetoothOn by remember { mutableStateOf(true) }
+    isBluetoothOn = bluetoothConnectionManager.isBluetoothOn()
+
+    val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+    val bluetoothOnLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        isBluetoothOn = result.resultCode == Activity.RESULT_OK
+    }
+
+    val disableBtIntent = Intent("android.bluetooth.adapter.action.REQUEST_DISABLE")
+    val bluetoothOffLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        isBluetoothOn = !(result.resultCode == Activity.RESULT_OK)
+    }
 
     Column(
         modifier = Modifier
@@ -61,7 +82,10 @@ fun DevicesScreen(bluetoothConnectionManager: BluetoothConnectionManager)
                 )
                 Switch(
                     checked = isBluetoothOn,
-                    onCheckedChange = { isBluetoothOn = it },
+                    onCheckedChange = {
+                        if (!bluetoothConnectionManager.isBluetoothOn()) bluetoothOnLauncher.launch(enableBtIntent)
+                        else bluetoothOffLauncher.launch(disableBtIntent)
+                    },
                     modifier = Modifier.scale(0.7f),
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = Color.White,
@@ -102,13 +126,22 @@ fun DevicesScreen(bluetoothConnectionManager: BluetoothConnectionManager)
         Spacer(modifier = Modifier.height(16.dp))
 
         // Paired devices section
-        Text(
-            text = "Dispositivos sincronizados",
-            style = TextStyle(
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Normal
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "Dispositivos sincronizados",
+                style = TextStyle(
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Normal
+                )
             )
-        )
+            IconButton(onClick = { /*TODO*/ }) {
+
+            }
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -123,6 +156,8 @@ fun DevicesScreen(bluetoothConnectionManager: BluetoothConnectionManager)
             PairedDeviceItem(deviceName = "HANDI_EPN")
             Spacer(modifier = Modifier.height(8.dp))
             PairedDeviceItem(deviceName = "FLEXIBLE_B2")
+            val devicesList = BluetoothHelper.getPairedDevices(context, bluetoothConnectionManager.getBluetoothAdapter())
+
         }
     }
 }
