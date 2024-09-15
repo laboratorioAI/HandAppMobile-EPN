@@ -65,14 +65,14 @@ fun HomeScreen(bluetoothConnectionManager: BluetoothConnectionManager) {
     val context = LocalContext.current
 
     // Variables para definir el movimiento de la mano HANDI_EPN
-    var lastSliderValuesHandiEPN = remember { mutableStateListOf(0, 0, 0, 0, 0, 0) }
-    var codesStringHandiEPN = remember { mutableStateListOf("A", "B", "C", "D", "E", "F") }
+    val lastSliderValuesHandiEPN = remember { mutableStateListOf(0, 0, 0, 0, 0, 0) }
+    val codesStringHandiEPN = remember { mutableStateListOf("A", "B", "C", "D", "E", "F") }
     val maxAngleValuesHandiEPN = remember { mutableStateListOf(380.0f, 380.0f, 400.0f, 400.0f, 400.0f, 200.0f) }
 
     //DEL 0 AL FF
     // Variables para definir el movimiento de la mano FLEXIBLE_V2
-    var lastSliderValuesFlexibleV2 = remember { mutableStateListOf(0, 0, 0, 0, 0, 0) }
-    var codesStringFlexibleV2 = remember { mutableStateListOf("A", "A", "B", "C", "D", "D") }
+    val lastSliderValuesFlexibleV2 = remember { mutableStateListOf(0, 0, 0, 0, 0, 0) }
+    val codesStringFlexibleV2 = remember { mutableStateListOf("a", "b", "c", "d", "e", "f") }
     val maxAngleValuesFlexibleV2 = remember { mutableStateListOf(255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f) }
 
     // booleano para comprobar si el bluetooth está conectado
@@ -102,11 +102,25 @@ fun HomeScreen(bluetoothConnectionManager: BluetoothConnectionManager) {
     var estaPulsadoMenique by remember { mutableStateOf(false) }
 
     // Comprobar la mano seleccionada para moverse
-    var estaSeleccionadaHandiEpn by remember { mutableStateOf(false) }
-    var estaSeleccionadaFlexibleV2 by remember { mutableStateOf(false) }
+    var estaSeleccionadaHandiEpn by remember { mutableStateOf(true) }
+    var estaSeleccionadaFlexibleV2 by remember { mutableStateOf(true) }
 
     // Declarar el estado para mostrar la pantalla de tutorial
     var mostrarPantallaTutorial by remember { mutableStateOf(false) }
+
+
+    // Función para actualizar las letras de codesStringFlexibleV2 en función del valor del slider
+    val updateCodesStringFlexibleV2: () -> Unit = {
+        codesStringFlexibleV2.forEachIndexed { index, _ ->
+            codesStringFlexibleV2[index] = if (sliderValue < 0) {
+                codesStringFlexibleV2[index].lowercase()
+            } else {
+                codesStringFlexibleV2[index].uppercase()
+            }
+        }
+    }
+
+
 
     // Funciones de botones
     val botonTutorial = { mostrarPantallaTutorial = true }
@@ -311,8 +325,14 @@ fun HomeScreen(bluetoothConnectionManager: BluetoothConnectionManager) {
 
         // Función que envía los comandos cuando el slider termina de moverse
         var isSliderMoving by remember { mutableStateOf(false) }
-        var sliderValue by remember { mutableStateOf(0f) }
         var sliderChangedTimestamp by remember { mutableStateOf(0L) }
+
+// Cambia el rango y valor inicial del slider según la mano seleccionada
+        val sliderValueRange = if (estaSeleccionadaHandiEpn) 0f..100f else -100f..100f
+
+// Ajusta el valor inicial del slider usando remember
+        val initialSliderValue = if (estaSeleccionadaHandiEpn) 0f else 0f
+        var sliderValue by remember(estaSeleccionadaHandiEpn) { mutableStateOf(initialSliderValue) }
 
         Slider(
             value = sliderValue,
@@ -321,21 +341,24 @@ fun HomeScreen(bluetoothConnectionManager: BluetoothConnectionManager) {
                 sliderChangedTimestamp = System.currentTimeMillis()
                 isSliderMoving = true  // Cambia el estado para indicar que el slider se está moviendo
             },
-            valueRange = 0f..100f,
-            modifier = Modifier.fillMaxWidth().padding(paddingValues = PaddingValues(10.dp, 0.dp)),
+            valueRange = sliderValueRange,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(PaddingValues(10.dp, 0.dp)),
             colors = SliderDefaults.colors(
                 thumbColor = if (isSliderMoving) colorResource(id = R.color.app_dark)
-                else colorResource(id = R.color.app_green),  // Cambia el color de la burbuja
+                else colorResource(id = R.color.app_green),
                 activeTrackColor = if (isSliderMoving) colorResource(id = R.color.app_dark)
-                else colorResource(id = R.color.app_green),  // Cambia el color de la parte activa
-                inactiveTrackColor = colorResource(id = R.color.app_dark)  // Color de la parte no seleccionada
+                else colorResource(id = R.color.app_green),
+                inactiveTrackColor = colorResource(id = R.color.app_dark)
             ),
             onValueChangeFinished = {
-                // Referencia a la función sendCommand
+                // Actualizar las letras en función del valor del slider
+                updateCodesStringFlexibleV2()
+
                 val sendCommand: (String) -> Unit = bluetoothConnectionManager::sendCommand
 
-                // Llamar a la función cuando el slider deja de moverse para HANDI_EPN
-                if (estaSeleccionadaHandiEpn){
+                if (estaSeleccionadaHandiEpn) {
                     EnviarComandosMovimiento(
                         estadosDedos = listOf(
                             estaPulsadoMenique,
@@ -366,15 +389,15 @@ fun HomeScreen(bluetoothConnectionManager: BluetoothConnectionManager) {
                         sliderValue = sliderValue,
                         lastSliderValues = lastSliderValuesFlexibleV2,
                         codesString = codesStringFlexibleV2,
-                        maxAngleValues = maxAngleValuesFlexibleV2,  // Mantener los valores como Float
+                        maxAngleValues = maxAngleValuesFlexibleV2,
                         sendCommand = sendCommand,
-                        useHex = true  // Indicar que se use hexadecimal
+                        useHex = true
                     )
                 }
-                // Cambia el estado para indicar que el slider dejó de moverse
                 isSliderMoving = false
             }
         )
+
 
         // Mostrar el valor actual del slider
         Text(

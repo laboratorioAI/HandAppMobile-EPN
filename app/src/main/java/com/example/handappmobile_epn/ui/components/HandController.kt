@@ -72,12 +72,12 @@ fun FingerImages(
     estaPulsadoAnular: Boolean,
     estaPulsadoMenique: Boolean
 ) {
-    MostrarImagen(estaPulsadoPulgarSuperior, R.drawable.pulgarsuperiorverde, 248.dp, 175.dp, 100.dp, 100.dp)
-    MostrarImagen(estaPulsadoPulgarInferior, R.drawable.pulgarinferiorverde, 183.dp, 245.dp, 110.dp, 110.dp)
-    MostrarImagen(estaPulsadoIndice, R.drawable.indiceverde, 120.dp, 28.dp, 235.dp, 235.dp)
-    MostrarImagen(estaPulsadoMedio, R.drawable.medioverde, 49.dp, 3.dp, 245.dp, 245.dp)
-    MostrarImagen(estaPulsadoAnular, R.drawable.anularverde, 8.dp, 36.dp, 205.dp, 205.dp)
-    MostrarImagen(estaPulsadoMenique, R.drawable.meniqueverde, -14.dp, 95.dp, 180.dp, 180.dp)
+    MostrarImagen(estaPulsadoPulgarSuperior, R.drawable.pulgarsuperiorverde, 264.dp, 175.dp, 103.dp, 103.dp)
+    MostrarImagen(estaPulsadoPulgarInferior, R.drawable.pulgarinferiorverde, 193.dp, 245.dp, 120.dp, 120.dp)
+    MostrarImagen(estaPulsadoIndice, R.drawable.indiceverde, 129.dp, 19.dp, 245.dp, 245.dp)
+    MostrarImagen(estaPulsadoMedio, R.drawable.medioverde, 53.dp, -8.dp, 258.dp, 258.dp)
+    MostrarImagen(estaPulsadoAnular, R.drawable.anularverde, 10.dp, 27.dp, 215.dp, 215.dp)
+    MostrarImagen(estaPulsadoMenique, R.drawable.meniqueverde, -12.dp, 89.dp, 188.dp, 188.dp)
 }
 
 @Composable
@@ -96,7 +96,7 @@ fun LogicaBotonesMano(onDedoPulsado: (String, Boolean) -> Unit) {
     BotonDedo("Índice", 140.dp, 120.dp, -70f, 200.dp, 35.dp, onDedoPulsado)
     BotonDedo("Medio", 60.dp, 90.dp, 90f, 230.dp, 35.dp, onDedoPulsado)
     BotonDedo("Anular", 10.dp, 90.dp, 75f, 200.dp, 35.dp, onDedoPulsado)
-    BotonDedo("Meñique", (-30).dp, 140.dp, 55f, 160.dp, 35.dp, onDedoPulsado)
+    BotonDedo("Meñique", (-20).dp, 140.dp, 55f, 160.dp, 35.dp, onDedoPulsado)
 }
 
 /* Función para declarar los datos de los botones de los dedos */
