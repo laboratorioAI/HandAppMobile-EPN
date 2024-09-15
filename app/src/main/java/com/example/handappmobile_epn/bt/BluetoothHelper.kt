@@ -19,18 +19,16 @@ import androidx.compose.runtime.Composable
 object BluetoothHelper {
 
     fun getPairedDevices(context: Context, bluetoothAdapter: BluetoothAdapter?):
-            Pair<ArrayAdapter<String>, ArrayAdapter<String>>? {
+            Map<String, String>? {
         return try {
-            val addressDevices = ArrayAdapter<String>(context, android.R.layout.simple_list_item_1)
-            val nameDevices = ArrayAdapter<String>(context, android.R.layout.simple_list_item_1)
+            val pairedDevicesMap = mutableMapOf<String, String>()
 
             val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter?.bondedDevices
             pairedDevices?.forEach { device ->
-                addressDevices.add(device.address)
-                nameDevices.add(device.name)
+                pairedDevicesMap[device.name] = device.address
             }
 
-            Pair(addressDevices, nameDevices)
+            pairedDevicesMap
         } catch (se: SecurityException) {
             se.printStackTrace()
             Log.e("BluetoothHelper", "Error de seguridad - Permisos Bluetooth no concedidos", se)
@@ -56,17 +54,6 @@ object BluetoothHelper {
 
     fun isBluetoothSupported(bluetoothAdapter: BluetoothAdapter?): Boolean {
         return bluetoothAdapter != null
-    }
-
-    @Composable
-    fun BluetoothOffComposable(
-        onResult: (Boolean) -> Unit)
-    {
-        val disableBtIntent = Intent("android.bluetooth.adapter.action.REQUEST_DISABLE")
-        val bluetoothOffLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            onResult(result.resultCode == Activity.RESULT_OK)
-        }
-        bluetoothOffLauncher.launch(disableBtIntent)
     }
 
 }

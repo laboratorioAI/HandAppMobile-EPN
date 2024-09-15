@@ -3,15 +3,23 @@ package com.example.handappmobile_epn.ui.screen
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.content.Intent
-import android.util.Log
-import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -22,16 +30,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.handappmobile_epn.R
 import com.example.handappmobile_epn.bt.BluetoothConnectionManager
 import com.example.handappmobile_epn.bt.BluetoothHelper
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun DevicesScreen(bluetoothConnectionManager: BluetoothConnectionManager)
@@ -49,6 +62,16 @@ fun DevicesScreen(bluetoothConnectionManager: BluetoothConnectionManager)
     val bluetoothOffLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         isBluetoothOn = !(result.resultCode == Activity.RESULT_OK)
     }
+
+    var showDevicesList by remember { mutableStateOf(true)}
+    var isLoading by remember { mutableStateOf(false) }
+
+    var connectedDeviceName by remember { mutableStateOf("Dispositivo") }
+
+    val auxDeviceName = bluetoothConnectionManager.getNameDeviceConnected()
+    if (auxDeviceName != null) connectedDeviceName = auxDeviceName else connectedDeviceName = "Dispositivo"
+
+    val scope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier
@@ -86,7 +109,10 @@ fun DevicesScreen(bluetoothConnectionManager: BluetoothConnectionManager)
                         if (!bluetoothConnectionManager.isBluetoothOn()) bluetoothOnLauncher.launch(enableBtIntent)
                         else bluetoothOffLauncher.launch(disableBtIntent)
                     },
-                    modifier = Modifier.scale(0.7f),
+                    modifier = Modifier
+                        .requiredSize(16.dp)
+                        .padding(end = 100.dp)
+                        .scale(0.6f),
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = Color.White,
                         checkedTrackColor = colorResource(id = R.color.app_green),
@@ -97,7 +123,7 @@ fun DevicesScreen(bluetoothConnectionManager: BluetoothConnectionManager)
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             // Connected status
             Row(
@@ -113,13 +139,22 @@ fun DevicesScreen(bluetoothConnectionManager: BluetoothConnectionManager)
                         fontWeight = FontWeight.Normal
                     )
                 )
-                Text(
-                    text = "Dispositivo",
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Normal
+
+                if (isLoading)
+                {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(ButtonDefaults.IconSize),
+                        color = Color(0xFFBBBBBB)
                     )
-                )
+                } else {
+                    Text(
+                        text = connectedDeviceName,
+                        style = TextStyle(
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Normal
+                        )
+                    )
+                }
             }
         }
 
@@ -129,7 +164,8 @@ fun DevicesScreen(bluetoothConnectionManager: BluetoothConnectionManager)
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Bottom
         ) {
             Text(
                 text = "Dispositivos sincronizados",
@@ -138,8 +174,18 @@ fun DevicesScreen(bluetoothConnectionManager: BluetoothConnectionManager)
                     fontWeight = FontWeight.Normal
                 )
             )
-            IconButton(onClick = { /*TODO*/ }) {
 
+            IconButton(
+                onClick = {
+                    showDevicesList = false
+                    showDevicesList = true
+                },
+                modifier = Modifier.requiredSize(13.dp))
+            {
+                Icon(
+                    imageVector = Icons.Filled.Refresh,
+                    contentDescription = "Reload"
+                )
             }
         }
 
@@ -149,32 +195,55 @@ fun DevicesScreen(bluetoothConnectionManager: BluetoothConnectionManager)
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(20.dp))
-                .background(Color.White)
-                .padding(30.dp, 15.dp))
+                .background(if (isLoading) Color(0xFFDDDDDD) else Color.White)
+                .padding(0.dp, 15.dp))
         {
-            // List of devices
-            PairedDeviceItem(deviceName = "HANDI_EPN")
-            Spacer(modifier = Modifier.height(8.dp))
-            PairedDeviceItem(deviceName = "FLEXIBLE_B2")
-            val devicesList = BluetoothHelper.getPairedDevices(context, bluetoothConnectionManager.getBluetoothAdapter())
+            if (showDevicesList) {
+                // List of devices
+                val devicesList = BluetoothHelper.getPairedDevices(context, bluetoothConnectionManager.getBluetoothAdapter())
+                var success by remember { mutableStateOf(false) }
+                devicesList?.forEach { (key, value) ->
+                    PairedDeviceItem(deviceName = key, enabled = !isLoading) {
+                        scope.launch(Dispatchers.IO) {
+                            isLoading = true
+                            success = bluetoothConnectionManager.connectToDevice(value)
+                            isLoading = false
+                            withContext(Dispatchers.Main) {
+                                if (!success) Toast.makeText(context, "ERROR DE CONEXIÓN", Toast.LENGTH_LONG).show()
+                                else Toast.makeText(context, "CONEXIÓN EXITOSA", Toast.LENGTH_LONG).show()
 
+                                val auxName = bluetoothConnectionManager.getNameDeviceConnected()
+                                if (auxName != null) connectedDeviceName = auxName else connectedDeviceName = "Dispositivo"
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
 
 @Composable
-fun PairedDeviceItem(deviceName: String) {
-    Box(
+fun PairedDeviceItem(deviceName: String, enabled:Boolean = true, onClick: () -> Unit = {}) {
+    Button(
+        onClick = onClick,
         modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.White)
-            .padding(0.dp, 16.dp)
+            .fillMaxWidth(),
+        enabled = enabled,
+        shape = RectangleShape,
+        colors = ButtonColors(
+            containerColor = Color.Transparent,
+            contentColor = Color.Black,
+            disabledContainerColor = Color.Transparent,
+            disabledContentColor = Color.Black
+        )
     ) {
         Text(
             text = deviceName,
             style = TextStyle(
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Normal
+                fontWeight = FontWeight.Normal,
+                textAlign = TextAlign.Start
             )
         )
     }
