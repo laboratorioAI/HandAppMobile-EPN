@@ -281,7 +281,7 @@ fun TerceraVentanaTutorial() {
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally) // Alinea la imagen horizontalmente
                     .width(240.dp)
-                    .height(160.dp)
+                    .height(140.dp)
             )
         }
     }
@@ -380,8 +380,8 @@ fun QuintaVentanaTutorial() {
                 contentDescription = "Seleccionar dedos",
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally) // Alinea la imagen horizontalmente
-                    .width(200.dp)
-                    .height(200.dp)
+                    .width(190.dp)
+                    .height(190.dp)
             )
         }
     }

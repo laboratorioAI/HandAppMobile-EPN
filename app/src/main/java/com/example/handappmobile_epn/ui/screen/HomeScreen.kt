@@ -20,6 +20,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -315,18 +316,30 @@ fun HomeScreen(bluetoothConnectionManager: BluetoothConnectionManager) {
                 sliderValue = 100f // Ajusta el slider al máximo
             }
         }
+        var btnOkStop by remember { mutableStateOf("Ok") }
+
+        LaunchedEffect(estaSeleccionadaHandiEpn, estaSeleccionadaFlexibleV2) {
+            // Cambiar el texto del botón en función del modo seleccionado
+            btnOkStop = if (estaSeleccionadaHandiEpn) {
+                "Ok"
+            } else if (estaSeleccionadaFlexibleV2) {
+                "Stop"
+            } else {
+                "Ok" // Valor por defecto
+            }
+        }
+
         val botonOK = {
-            /* Ingresar aquí la funcionalidad del botón */
-            if(estaSeleccionadaHandiEpn){
+            if (estaSeleccionadaHandiEpn) {
                 bluetoothConnectionManager.sendCommand("P")
                 sliderValue = 0f // Ajusta el slider al mínimo
             }
-            if(estaSeleccionadaFlexibleV2){
+            if (estaSeleccionadaFlexibleV2) {
                 bluetoothConnectionManager.sendCommand("S:")
                 sliderValue = 0f // Ajusta el slider al mínimo
             }
-
         }
+
 
         // Creación de un bloque horizontal de elementos
         Row {
@@ -345,10 +358,10 @@ fun HomeScreen(bluetoothConnectionManager: BluetoothConnectionManager) {
             Spacer(modifier = Modifier.width(20.dp))
 
             // Botón señal "OK" y "Stop" (Depende del dispositivo)
-            Button(onClick = botonOK,
+            Button(
+                onClick = botonOK,
                 modifier = Modifier
                     .size(width = 100.dp, 40.dp),
-
                 colors = ButtonDefaults.buttonColors(
                     colorResource(id = R.color.app_primary)
                 )
