@@ -33,11 +33,12 @@ import androidx.navigation.compose.rememberNavController
 import com.example.handappmobile_epn.R
 import com.example.handappmobile_epn.ui.components.BackScaffoldContent
 import com.example.handappmobile_epn.ui.components.ViewContainer
+import com.example.handappmobile_epn.utils.DebugSettings
 
 @Composable
 fun SettingsScreen()
 {
-    var isDebugModeOn by remember { mutableStateOf(true) }
+    var isDebugModeOn by remember { mutableStateOf(DebugSettings.isDebugModeOn) }
 
     Column(
         modifier = Modifier
@@ -72,7 +73,10 @@ fun SettingsScreen()
             )
             Switch(
                 checked = isDebugModeOn,
-                onCheckedChange = { isDebugModeOn = it },
+                onCheckedChange = {
+                    isDebugModeOn = it                  // Local state
+                    DebugSettings.isDebugModeOn = it    // Global state
+                },
                 modifier = Modifier.scale(0.7f),
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = Color.White,

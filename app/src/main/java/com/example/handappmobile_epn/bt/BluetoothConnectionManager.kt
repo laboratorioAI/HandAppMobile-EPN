@@ -53,6 +53,31 @@ class BluetoothConnectionManager(private val bluetoothAdapter: BluetoothAdapter?
         }
     }
 
+    fun receiveMessage(): String? {
+        val stringBuilder = StringBuilder()
+        if (bluetoothSocket != null) {
+            try {
+                val inputStream = bluetoothSocket!!.inputStream
+                var charRead: Int
+                while (true) {
+                    charRead = inputStream.read()
+                    if (charRead == -1) {
+                        break
+                    }
+                    val char = charRead.toChar()
+                    stringBuilder.append(char)
+
+                    if (char == '\n') {
+                        break
+                    }
+                }
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
+        return stringBuilder.toString().trim()
+    }
+
     fun isConnected(): Boolean {
         return bluetoothSocket?.isConnected ?: false
     }

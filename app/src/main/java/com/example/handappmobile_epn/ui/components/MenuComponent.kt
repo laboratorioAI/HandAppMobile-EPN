@@ -75,6 +75,7 @@ import com.example.handappmobile_epn.bt.BluetoothConnectionManager
 import com.example.handappmobile_epn.navigation.AppNavigation
 import com.example.handappmobile_epn.navigation.AppScreens
 import com.example.handappmobile_epn.ui.screen.PantallaTutorial
+import com.example.handappmobile_epn.utils.DebugSettings
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.launch
 
@@ -94,12 +95,14 @@ fun MenuLateralScreen(bluetoothConnectionManager: BluetoothConnectionManager) {
 
 @Composable
 fun MenuLateralContent(navController: NavController, drawerState: DrawerState) {
+    //var isDebugModeOn by remember { mutableStateOf() }
     val items: List<AppScreens> = listOf(
         AppScreens.HomeScreen,
         AppScreens.DevicesScreen,
+        if (DebugSettings.isDebugModeOn) AppScreens.DebugScreen else null,
         AppScreens.SettingsScreen,
         AppScreens.AboutScreen
-    )
+    ).filterNotNull()
     val scope = rememberCoroutineScope()
     var selectedItemIndex by rememberSaveable {
         mutableStateOf(0)
