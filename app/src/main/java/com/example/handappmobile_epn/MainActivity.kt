@@ -1,5 +1,6 @@
 package com.example.handappmobile_epn
 
+import SetSystemBars
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
@@ -51,7 +52,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Bluetooth adapter initialization - allows interact with bluetooth hardware
         bluetoothAdapter = (getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter
         bluetoothConnectionManager = BluetoothConnectionManager(bluetoothAdapter)
 
@@ -61,7 +61,11 @@ class MainActivity : ComponentActivity() {
         }
 
         enableEdgeToEdge()
+
         setContent {
+            // Llamada a la función para configurar la barra de navegación
+            SetSystemBars()
+
             // Request Bluetooth permissions
             val permissionsBT = arrayOf(
                 Manifest.permission.BLUETOOTH,
@@ -83,13 +87,13 @@ class MainActivity : ComponentActivity() {
             }
 
             Log.d("MensajeAA", "Hola mundo")
-            if(!BluetoothHelper.checkBluetoothPermissions(this))
-            {
+            if (!BluetoothHelper.checkBluetoothPermissions(this)) {
                 AlertDialog(
                     onDismissRequest = {
                         finish() // Exit the app
                     },
-                    title = { Text("Permisos requeridos") },text = { Text("Esta aplicación necesita permisos de Bluetooth para funcionar correctamente.") },
+                    title = { Text("Permisos requeridos") },
+                    text = { Text("Esta aplicación necesita permisos de Bluetooth para funcionar correctamente.") },
                     confirmButton = {
                         Button(
                             onClick = { requestPermissionLauncher.launch(permissionsBT) },
@@ -97,9 +101,9 @@ class MainActivity : ComponentActivity() {
                                 containerColor = colorResource(id = R.color.app_primary),
                                 contentColor = Color.White,
                                 disabledContainerColor = Color.Gray,
-                                disabledContentColor = Color.White)
-                        )
-                        {
+                                disabledContentColor = Color.White
+                            )
+                        ) {
                             Text("Conceder permisos")
                         }
                     },
@@ -110,8 +114,9 @@ class MainActivity : ComponentActivity() {
                                 containerColor = colorResource(id = R.color.app_primary),
                                 contentColor = Color.White,
                                 disabledContainerColor = Color.Gray,
-                                disabledContentColor = Color.White))
-                        {
+                                disabledContentColor = Color.White
+                            )
+                        ) {
                             Text("Salir")
                         }
                     },
