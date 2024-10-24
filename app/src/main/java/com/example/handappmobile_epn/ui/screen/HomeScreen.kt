@@ -32,7 +32,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.handappmobile_epn.R
@@ -41,6 +40,11 @@ import com.example.handappmobile_epn.ui.components.HandController
 import java.util.Locale
 import kotlin.math.abs
 
+/**
+ * Pantalla principal de la aplicación.
+ *
+ * @param bluetoothConnectionManager Maneja la conexión Bluetooth para comunicarse con dispositivos.
+ */
 @Composable
 fun HomeScreen(bluetoothConnectionManager: BluetoothConnectionManager) {
     // Variables para definir el movimiento de la mano HANDI_EPN
@@ -388,6 +392,19 @@ fun HomeScreen(bluetoothConnectionManager: BluetoothConnectionManager) {
     }
 }
 
+/**
+ * Enviar comandos de movimiento a la mano.
+ *
+ * @param estadosDedos Lista de estados de cada dedo (pulsado o no).
+ * @param sliderValue Valor actual del slider que determina la posición de la mano.
+ * @param lastSliderValues Lista de los últimos valores del slider para cada dedo.
+ * @param codesString Lista de códigos asociados a cada dedo.
+ * @param maxAngleValues Lista de los valores máximos de ángulo para cada dedo.
+ * @param sendCommand Función que envía los comandos a través de Bluetooth.
+ * @param useHex Indica si se debe utilizar el formato hexadecimal para los valores de movimiento.
+ * @receiver Esta función no es composable y se encarga de enviar los valores de movimiento
+ *           si un dedo está pulsado.
+ */
 /* Función no composable que envía los valores de movimiento en caso de que esté pulsado un dedo */
 fun enviarComandosMovimiento(
     estadosDedos: List<Boolean>,
@@ -419,10 +436,4 @@ fun enviarComandosMovimiento(
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun HomeScreenPreview() {
-    HomeScreen(BluetoothConnectionManager(null))
 }

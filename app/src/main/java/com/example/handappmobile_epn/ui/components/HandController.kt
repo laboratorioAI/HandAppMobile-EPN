@@ -22,13 +22,23 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.handappmobile_epn.R
-import com.example.handappmobile_epn.bt.BluetoothConnectionManager
-import com.example.handappmobile_epn.ui.screen.HomeScreen
 
+/**
+ * Controlador de la mano
+ *
+ * @param estaPulsadoPulgarSuperior Indica si el pulgar superior está pulsado.
+ * @param estaPulsadoPulgarInferior Indica si el pulgar inferior está pulsado.
+ * @param estaPulsadoIndice Indica si el dedo índice está pulsado.
+ * @param estaPulsadoMedio Indica si el dedo medio está pulsado.
+ * @param estaPulsadoAnular Indica si el dedo anular está pulsado.
+ * @param estaPulsadoMenique Indica si el meñique está pulsado.
+ * @param habilitar Determina si los botones de los dedos están habilitados.
+ * @param onDedoPulsado Función que se invoca cuando un dedo es pulsado, recibe el nombre del dedo y su estado.
+ * @receiver
+ */
 @Composable
 fun HandController(
     estaPulsadoPulgarSuperior: Boolean,
@@ -78,6 +88,16 @@ fun HandController(
     }
 }
 
+/**
+ * Imágenes de los dedos
+ *
+ * @param estaPulsadoPulgarSuperior Indica si el pulgar superior está pulsado.
+ * @param estaPulsadoPulgarInferior Indica si el pulgar inferior está pulsado.
+ * @param estaPulsadoIndice Indica si el dedo índice está pulsado.
+ * @param estaPulsadoMedio Indica si el dedo medio está pulsado.
+ * @param estaPulsadoAnular Indica si el dedo anular está pulsado.
+ * @param estaPulsadoMenique Indica si el meñique está pulsado.
+ */
 @Composable
 fun FingerImages(
     estaPulsadoPulgarSuperior: Boolean,
@@ -95,6 +115,12 @@ fun FingerImages(
     MostrarImagen(estaPulsadoMenique, R.drawable.meniqueverde, (-12).dp, 89.dp, 188.dp, 188.dp)
 }
 
+/**
+ * Botones de la mano
+ *
+ * @param onDedoPulsado Función que se invoca cuando un dedo es pulsado, recibe el nombre del dedo y su estado.
+ * @receiver
+ */
 @Composable
 fun HandButtons(onDedoPulsado: (String, Boolean) -> Unit) {
     LogicaBotonesMano(
@@ -102,9 +128,15 @@ fun HandButtons(onDedoPulsado: (String, Boolean) -> Unit) {
     )
 }
 
-/* Creación de los botones de la mano */
+/**
+ * Lógica de los botones de la mano
+ *
+ * @param onDedoPulsado Función que se invoca cuando un dedo es pulsado, recibe el nombre del dedo y su estado.
+ * @receiver
+ */
 @Composable
 fun LogicaBotonesMano(onDedoPulsado: (String, Boolean) -> Unit) {
+    /* Creación de los botones de la mano */
     // Botones y lógica de HandiEpn aquí
     BotonDedo("Pulgar Superior", 270.dp, 210.dp, -45f, 90.dp, 40.dp, onDedoPulsado)
     BotonDedo("Pulgar Inferior", 210.dp, 280.dp, -45f, 90.dp, 40.dp, onDedoPulsado)
@@ -114,7 +146,18 @@ fun LogicaBotonesMano(onDedoPulsado: (String, Boolean) -> Unit) {
     BotonDedo("Meñique", (-20).dp, 140.dp, 55f, 155.dp, 35.dp, onDedoPulsado)
 }
 
-/* Función para declarar los datos de los botones de los dedos */
+/**
+ * Botón de dedo
+ *
+ * @param nombre Nombre del dedo asociado al botón.
+ * @param offsetX Desplazamiento en el eje X del botón.
+ * @param offsetY Desplazamiento en el eje Y del botón.
+ * @param rotacion Ángulo de rotación del botón.
+ * @param width Ancho del botón.
+ * @param height Alto del botón.
+ * @param onClick Función que se invoca cuando se hace clic en el botón, recibe el nombre del dedo y su estado.
+ * @receiver
+ */
 @Composable
 fun BotonDedo(
     nombre: String,
@@ -125,6 +168,7 @@ fun BotonDedo(
     height: Dp,
     onClick: (String, Boolean) -> Unit
 ) {
+    /* Función para declarar los datos de los botones de los dedos */
     var estado by remember { mutableStateOf(false) } // Estado inicial del botón
 
     Button(
@@ -144,10 +188,4 @@ fun BotonDedo(
     ) {
         /* El botón es invisible, pero realiza la acción de alternar el estado */
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun HomeScreenPreview() {
-    HomeScreen(BluetoothConnectionManager(null))
 }

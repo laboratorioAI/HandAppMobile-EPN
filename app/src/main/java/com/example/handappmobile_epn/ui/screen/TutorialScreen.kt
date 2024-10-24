@@ -1,7 +1,6 @@
 package com.example.handappmobile_epn.ui.screen
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,12 +23,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -39,6 +37,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.handappmobile_epn.R
 
+/**
+ * Pantalla tutorial
+ *
+ * Muestra un tutorial interactivo que guía al usuario a través de los pasos necesarios para utilizar la aplicación.
+ *
+ * @param onDismiss Función que se ejecuta cuando se cierra la pantalla tutorial.
+ * @receiver
+ */
 @Composable
 fun PantallaTutorial(onDismiss: () -> Unit) {
     // Declarar el array de 5 elementos con lambdas que invocan composables
@@ -52,7 +58,7 @@ fun PantallaTutorial(onDismiss: () -> Unit) {
     )
 
     // Controlar la posición actual en el tutorial
-    var posicionActual by remember { mutableStateOf(0) }
+    var posicionActual by remember { mutableIntStateOf(0) }
 
     // Contenido del diálogo
     AlertDialog(
@@ -134,9 +140,14 @@ fun PantallaTutorial(onDismiss: () -> Unit) {
 
 }
 
-/* Ventana tutorial que corresponde a los permisos del aplicativo */
+/**
+ * Primera ventana tutorial
+ *
+ * Ventana tutorial que corresponde a los permisos del aplicativo. Informa al usuario sobre la necesidad de otorgar permisos Bluetooth.
+ */
 @Composable
 fun PrimeraVentanaTutorial() {
+    /* Ventana tutorial que corresponde a los permisos del aplicativo */
     Box(
         modifier = Modifier.fillMaxWidth() // Ocupa completamente el espacio disponible
     ) {
@@ -169,9 +180,14 @@ fun PrimeraVentanaTutorial() {
     }
 }
 
-/* Ventana tutorial que corresponde a la conexión bluetooth del equipo */
+/**
+ * Segunda ventana tutorial
+ *
+ * Ventana tutorial que corresponde a la conexión Bluetooth del equipo. Informa al usuario sobre la activación del Bluetooth y la vinculación con dispositivos.
+ */
 @Composable
 fun SegundaVentanaTutorial() {
+    /* Ventana tutorial que corresponde a la conexión bluetooth del equipo */
     Box(
         modifier = Modifier.fillMaxWidth() // Ocupa completamente el espacio disponible
     ) {
@@ -226,9 +242,14 @@ fun SegundaVentanaTutorial() {
     }
 }
 
-/* Ventana tutorial que corresponde al menú de opciones */
+/**
+ * Tercera ventana tutorial
+ *
+ * Ventana tutorial que corresponde al menú de opciones. Guía al usuario sobre cómo acceder al menú y las funcionalidades disponibles.
+ */
 @Composable
 fun TerceraVentanaTutorial() {
+    /* Ventana tutorial que corresponde al menú de opciones */
     Box(
         modifier = Modifier.fillMaxWidth() // Ocupa completamente el espacio disponible
     ) {
@@ -287,10 +308,14 @@ fun TerceraVentanaTutorial() {
     }
 }
 
-/* Ventana tutorial que corresponde a la selección de una mano dentro del aplicativo */
+/**
+ * Cuarta ventana tutorial
+ *
+ * Ventana tutorial que corresponde a la selección de una mano dentro del aplicativo. Informa al usuario sobre cómo conectarse a la prótesis deseada.
+ */
 @Composable
 fun CuartaVentanaTutorial() {
-
+    /* Ventana tutorial que corresponde a la selección de una mano dentro del aplicativo */
     Box(
         modifier = Modifier.fillMaxWidth() // Ocupa completamente el espacio disponible
     ) {
@@ -349,9 +374,14 @@ fun CuartaVentanaTutorial() {
     }
 }
 
-/* Ventana tutorial que corresponde al uso de la mano */
+/**
+ * Quinta ventana tutorial
+ *
+ * Ventana tutorial que corresponde al uso de la mano. Informa al usuario sobre cómo seleccionar los dedos a mover y su representación visual.
+ */
 @Composable
 fun QuintaVentanaTutorial() {
+    /* Ventana tutorial que corresponde al uso de la mano */
     Box(
         modifier = Modifier.fillMaxWidth() // Ocupa completamente el espacio disponible
     ) {
@@ -387,9 +417,14 @@ fun QuintaVentanaTutorial() {
     }
 }
 
-/* Ventana tutorial que corresponde a la señalización de funciones adicionales */
+/**
+ * Sexta ventana tutorial
+ *
+ * Ventana tutorial que corresponde a la señalización de funciones adicionales. Informa al usuario sobre el uso del slider para definir el porcentaje de movimiento.
+ */
 @Composable
 fun SextaVentanaTutorial() {
+    /* Ventana tutorial que corresponde a la señalización de funciones adicionales */
     Box(
         modifier = Modifier.fillMaxWidth() // Ocupa completamente el espacio disponible
     ) {
@@ -446,8 +481,6 @@ fun SextaVentanaTutorial() {
         }
     }
 }
-
-
 
 
 @Preview(showBackground = true)

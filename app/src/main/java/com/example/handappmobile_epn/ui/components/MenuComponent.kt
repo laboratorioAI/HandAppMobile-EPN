@@ -5,38 +5,19 @@ package com.example.handappmobile_epn.ui.components
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bluetooth
-import androidx.compose.material.icons.filled.HelpOutline
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.ColorScheme
-import androidx.compose.material3.DrawerDefaults
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -46,13 +27,12 @@ import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -61,10 +41,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -79,9 +57,17 @@ import com.example.handappmobile_epn.utils.DebugSettings
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.launch
 
+/**
+ * Pantalla del menú lateral.
+ *
+ * Esta función crea la interfaz de usuario para el menú lateral de la aplicación,
+ * permitiendo la navegación entre diferentes pantallas a través de un controlador de navegación.
+ *
+ * @param bluetoothConnectionManager Maneja la conexión Bluetooth para la aplicación.
+ */
 @Composable
 fun MenuLateralScreen(bluetoothConnectionManager: BluetoothConnectionManager) {
-    var drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val navController = rememberNavController()
 
     ModalNavigationDrawer(
@@ -93,9 +79,17 @@ fun MenuLateralScreen(bluetoothConnectionManager: BluetoothConnectionManager) {
     )
 }
 
+/**
+ * Contenido del menú lateral.
+ *
+ * Esta función define los elementos que se mostrarán en el menú lateral,
+ * incluyendo las pantallas disponibles para la navegación y su correspondiente lógica.
+ *
+ * @param navController Controlador de navegación para gestionar la navegación entre pantallas.
+ * @param drawerState Estado del cajón del menú lateral.
+ */
 @Composable
 fun MenuLateralContent(navController: NavController, drawerState: DrawerState) {
-    //var isDebugModeOn by remember { mutableStateOf() }
     val items: List<AppScreens> = listOf(
         AppScreens.HomeScreen,
         AppScreens.DevicesScreen,
@@ -105,7 +99,7 @@ fun MenuLateralContent(navController: NavController, drawerState: DrawerState) {
     ).filterNotNull()
     val scope = rememberCoroutineScope()
     var selectedItemIndex by rememberSaveable {
-        mutableStateOf(0)
+        mutableIntStateOf(0)
     }
 
     // Crear el controlador para modificar las barras de sistema
@@ -126,7 +120,7 @@ fun MenuLateralContent(navController: NavController, drawerState: DrawerState) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        items.forEachIndexed() { index, item ->
+        items.forEachIndexed { index, item ->
             NavigationDrawerItem(
                 label = { Text(text = item.title) },
                 selected = index == selectedItemIndex,
@@ -135,6 +129,7 @@ fun MenuLateralContent(navController: NavController, drawerState: DrawerState) {
                     scope.launch {
                         drawerState.close()
 
+                        // Lógica de navegación - Navegar a la pantalla correspondiente de acuerdo a la ruta definida en navigation/AppScreens.kt
                         val route = item.route
                         if (navController.currentBackStackEntry?.destination?.route != route) {
                             navController.navigate(route) {
@@ -169,6 +164,12 @@ fun MenuLateralContent(navController: NavController, drawerState: DrawerState) {
     }
 }
 
+/**
+ * Encabezado del menú lateral.
+ *
+ * Esta función crea la parte superior del menú lateral,
+ * que incluye el logo y el título de la aplicación.
+ */
 @Composable
 fun MenuLateralHeader() {
     val logo = painterResource(id = R.drawable.logocircular)
@@ -195,6 +196,16 @@ fun MenuLateralHeader() {
 
 }
 
+/**
+ * Contenido del scaffold del menú.
+ *
+ * Esta función proporciona la estructura básica para la pantalla principal,
+ * incluyendo la barra superior y el contenido de navegación de la aplicación.
+ *
+ * @param navController Controlador de navegación.
+ * @param drawerState Estado del cajón del menú lateral.
+ * @param bluetoothConnectionManager Maneja la conexión Bluetooth para la aplicación.
+ */
 @Composable
 fun MenuScaffoldContent(
     navController: NavHostController,
@@ -213,16 +224,14 @@ fun MenuScaffoldContent(
     }
 }
 
-@Preview
-@Composable
-fun PruebaPreview() {
-    MenuScaffoldContent(
-        navController = rememberNavController(),
-        drawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
-        bluetoothConnectionManager = BluetoothConnectionManager(null)
-    )
-}
-
+/**
+ * Barra superior del menú.
+ *
+ * Esta función crea la barra superior que contiene el título de la aplicación
+ * y los iconos de navegación, permitiendo abrir el menú lateral y mostrar un tutorial.
+ *
+ * @param drawerState Estado del cajón del menú lateral.
+ */
 @Composable
 fun MenuToolBar(
     drawerState: DrawerState)

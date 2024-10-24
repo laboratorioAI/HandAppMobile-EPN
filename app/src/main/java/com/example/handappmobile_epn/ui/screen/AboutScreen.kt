@@ -16,14 +16,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CardElevation
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -45,14 +41,21 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.handappmobile_epn.R
-import com.example.handappmobile_epn.bt.BluetoothConnectionManager
-import com.example.handappmobile_epn.ui.components.BackScaffoldContent
-import com.example.handappmobile_epn.ui.components.ViewContainer
 
 
+/**
+ * Pantalla de "Acerca de" que muestra información de la aplicación, enlaces a redes sociales,
+ * y contribuyentes del proyecto.
+ *
+ * Esta pantalla incluye:
+ * - Información sobre la aplicación.
+ * - Enlaces a las redes sociales del laboratorio.
+ * - Información sobre los contribuyentes con posibilidad de abrir sus perfiles de GitHub.
+ * - Botón para abrir enlaces a las redes sociales del laboratorio y el laboratorio de inteligencia artificial.
+ *
+ * @Composable Esta función es una composición de Jetpack Compose, que gestiona su estado y UI.
+ */
 @Composable
 fun AboutScreen() {
     
@@ -66,7 +69,7 @@ fun AboutScreen() {
         verticalArrangement = Arrangement.spacedBy(2.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Top Section
+        // Caja que contiene el nombre y el logo del laboratorio
         Card(
             shape = RoundedCornerShape(16.dp),
             modifier = Modifier
@@ -112,7 +115,7 @@ fun AboutScreen() {
             }
         }
 
-        // Middle Section
+        // Caja que contiene los logos de EPN y FIS
         Card(
             shape = RoundedCornerShape(16.dp),
             modifier = Modifier
@@ -161,6 +164,7 @@ fun AboutScreen() {
 
         var showDialog by remember { mutableStateOf(false) }
 
+        // Caja que contiene el enlace a la página web del laboratorio y los logos de redes sociales
         Card(
             shape = RoundedCornerShape(16.dp),
             modifier = Modifier

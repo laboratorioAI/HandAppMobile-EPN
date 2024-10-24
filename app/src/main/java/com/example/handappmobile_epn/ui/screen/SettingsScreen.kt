@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -25,30 +24,33 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.handappmobile_epn.R
-import com.example.handappmobile_epn.ui.components.BackScaffoldContent
-import com.example.handappmobile_epn.ui.components.ViewContainer
 import com.example.handappmobile_epn.utils.DebugSettings
 
+/**
+ * Pantalla de configuración de la aplicación.
+ *
+ * Permite activar o desactivar las opciones de depuración mediante un interruptor.
+ */
 @Composable
 fun SettingsScreen()
 {
+    // Estado local para el modo de depuración.
     var isDebugModeOn by remember { mutableStateOf(DebugSettings.isDebugModeOn) }
 
+    // Contenedor vertical que permite el desplazamiento.
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFEEEEEE))
             .padding(30.dp, 40.dp)
-            .verticalScroll(rememberScrollState()),
+            .verticalScroll(rememberScrollState()), // Desplazamiento vertical.
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start)
     {
+        // Título de la sección.
         Text(
             text = "Depuración",
             color = colorResource(id = R.color.app_primary),
@@ -58,6 +60,7 @@ fun SettingsScreen()
             )
         )
 
+        // Fila con el texto y el interruptor.
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
@@ -71,13 +74,14 @@ fun SettingsScreen()
                     fontWeight = FontWeight.SemiBold
                 )
             )
+            // Interruptor para activar/desactivar el modo de depuración.
             Switch(
                 checked = isDebugModeOn,
                 onCheckedChange = {
-                    isDebugModeOn = it                  // Local state
-                    DebugSettings.isDebugModeOn = it    // Global state
+                    isDebugModeOn = it                  // Estado local.
+                    DebugSettings.isDebugModeOn = it    // Estado global.
                 },
-                modifier = Modifier.scale(0.7f),
+                modifier = Modifier.scale(0.7f),        // Tamaño del interruptor.
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = Color.White,
                     checkedTrackColor = colorResource(id = R.color.app_green),
@@ -88,11 +92,4 @@ fun SettingsScreen()
             )
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun AjustesPreview()
-{
-    SettingsScreen()
 }

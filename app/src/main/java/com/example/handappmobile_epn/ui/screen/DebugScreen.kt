@@ -33,6 +33,24 @@ import com.example.handappmobile_epn.utils.DebugSettings
 import kotlinx.coroutines.delay
 import java.io.IOException
 
+/**
+ * Pantalla de depuración que muestra los mensajes recibidos desde una conexión Bluetooth.
+ *
+ * Esta pantalla permite monitorear los mensajesrecibidos en tiempo real desde un dispositivo
+ * conectado mediante Bluetooth. Los mensajes se actualizan de manera continua y se muestra una lista de los
+ * últimos mensajes recibidos. Si no hay conexión Bluetooth o el modo de depuración está desactivado,
+ * no se actualizará la lista de mensajes.
+ *
+ * @param bluetoothConnectionManager Gestor de conexión Bluetooth utilizado para recibir los mensajes.
+ *
+ * Comportamiento:
+ * - Si la conexión Bluetooth está activa y el modo de depuración está habilitado, los mensajes se reciben
+ *   continuamente y se muestran en una lista con desplazamiento automático.
+ * - Solo se muestran los últimos 100 mensajes.
+ * - El color de fondo es personalizado y los mensajes se muestran en verde.
+ *
+ * @Composable Esta función es una composición de Jetpack Compose, que gestiona su estado y UI.
+ */
 @Composable
 fun DebugScreen(bluetoothConnectionManager: BluetoothConnectionManager)
 {
@@ -47,7 +65,7 @@ fun DebugScreen(bluetoothConnectionManager: BluetoothConnectionManager)
                     val receivedMessage = bluetoothConnectionManager.receiveMessage()
 
                     // Update messages list only if there is a message
-                    if (!receivedMessage.isNullOrEmpty()) {
+                    if (receivedMessage.isNotEmpty()) {
                         messages = (messages + receivedMessage).takeLast(maxMessages)
 
                         // Automatic scroll at the end
@@ -100,11 +118,4 @@ fun DebugScreen(bluetoothConnectionManager: BluetoothConnectionManager)
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DebugPreview()
-{
-    DebugScreen(bluetoothConnectionManager = BluetoothConnectionManager(null))
 }

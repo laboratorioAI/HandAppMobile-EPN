@@ -13,51 +13,44 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.navigation.compose.rememberNavController
 import com.example.handappmobile_epn.bt.BluetoothConnectionManager
 import com.example.handappmobile_epn.bt.BluetoothHelper
-import com.example.handappmobile_epn.navigation.AppNavigation
 import com.example.handappmobile_epn.ui.components.MenuLateralScreen
 import com.example.handappmobile_epn.ui.components.ViewContainer
-import com.example.handappmobile_epn.ui.screen.DevicesScreen
-import com.example.handappmobile_epn.ui.screen.HomeScreen
-import com.example.handappmobile_epn.ui.screen.PantallaTutorial
 import com.example.handappmobile_epn.ui.theme.HandAppMobileEPNTheme
 
+/**
+ * Main activity
+ *
+ * Autores:
+ * - Stiven Moposita
+ * - Daniel Lorences
+ */
 class MainActivity : ComponentActivity() {
 
+    // Adaptador Bluetooth para manejar las conexiones Bluetooth.
     private lateinit var bluetoothAdapter: BluetoothAdapter
     private lateinit var bluetoothConnectionManager: BluetoothConnectionManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Inicializa el adaptador Bluetooth utilizando el servicio del sistema
         bluetoothAdapter = (getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter
         bluetoothConnectionManager = BluetoothConnectionManager(bluetoothAdapter)
 
+        // Verifica si el dispositivo soporta Bluetooth
         if (!BluetoothHelper.isBluetoothSupported(bluetoothAdapter)) {
             Toast.makeText(this, "Bluetooth no soportado", Toast.LENGTH_LONG).show()
-            return
+            return // Finaliza la actividad si el dispositivo no soporta Bluetooth
         }
 
         enableEdgeToEdge()
@@ -66,7 +59,7 @@ class MainActivity : ComponentActivity() {
             // Llamada a la función para configurar la barra de navegación
             SetSystemBars()
 
-            // Request Bluetooth permissions
+            // Variable con permisos necesarios para el uso de Bluetooth
             val permissionsBT = arrayOf(
                 Manifest.permission.BLUETOOTH,
                 Manifest.permission.BLUETOOTH_ADMIN,
@@ -74,6 +67,7 @@ class MainActivity : ComponentActivity() {
                 Manifest.permission.BLUETOOTH_SCAN
             )
 
+            // Manejador para solicitar múltiples permisos
             val requestPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { results ->
                 results.forEach { (permission, isGranted) ->
                     recreate() // Recreate the activity to apply the new permissions
@@ -86,15 +80,17 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            Log.d("MensajeAA", "Hola mundo")
+            // Verifica si los permisos de Bluetooth han sido otorgados
             if (!BluetoothHelper.checkBluetoothPermissions(this)) {
+                // Muestra un diálogo de solicitud de permisos si no están concedidos
                 AlertDialog(
                     onDismissRequest = {
-                        finish() // Exit the app
+                        finish() // Finaliza la actividad si el usuario no concede los permisos
                     },
                     title = { Text("Permisos requeridos") },
                     text = { Text("Esta aplicación necesita permisos de Bluetooth para funcionar correctamente.") },
                     confirmButton = {
+                        // Botón para conceder los permisos
                         Button(
                             onClick = { requestPermissionLauncher.launch(permissionsBT) },
                             colors = ButtonColors(
@@ -108,6 +104,7 @@ class MainActivity : ComponentActivity() {
                         }
                     },
                     dismissButton = {
+                        // Botón para salir de la aplicación si no se conceden los permisos
                         Button(
                             onClick = { finish() /*Exit the app*/ },
                             colors = ButtonColors(
@@ -124,17 +121,19 @@ class MainActivity : ComponentActivity() {
                 )
             }
 
-            ViewContainer() {
+            // Muestra la pantalla principal
+            ViewContainer {
                 MenuLateralScreen(bluetoothConnectionManager)
             }
         }
     }
 }
 
-// @Preview(showBackground = true)
+@Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
+    val bluetoothConnectionManager = BluetoothConnectionManager(null)
     HandAppMobileEPNTheme {
-        PantallaTutorial(onDismiss = {})
+        MenuLateralScreen(bluetoothConnectionManager)
     }
 }

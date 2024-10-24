@@ -7,14 +7,12 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
@@ -36,7 +34,6 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.handappmobile_epn.R
@@ -46,33 +43,50 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/**
+ * Pantalla de dispositivos emparejados.
+ *
+ * Esta función muestra la lista de dispositivos Bluetooth emparejados y permite al usuario conectarse o
+ * desconectarse de ellos. También incluye un interruptor para activar o desactivar Bluetooth.
+ *
+ * @param bluetoothConnectionManager Gestor de conexión Bluetooth utilizado para controlar el estado y la conexión con los dispositivos.
+ */
 @Composable
-fun DevicesScreen(bluetoothConnectionManager: BluetoothConnectionManager)
-{
+fun DevicesScreen(bluetoothConnectionManager: BluetoothConnectionManager) {
+    // Obtiene el contexto actual de la aplicación
     val context = LocalContext.current
+
+    // Estado que indica si el Bluetooth está activado
     var isBluetoothOn by remember { mutableStateOf(true) }
     isBluetoothOn = bluetoothConnectionManager.isBluetoothOn()
 
+    // Intentos para activar o desactivar Bluetooth
     val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-    val bluetoothOnLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        isBluetoothOn = result.resultCode == Activity.RESULT_OK
-    }
+    val bluetoothOnLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            isBluetoothOn = result.resultCode == Activity.RESULT_OK
+        }
 
     val disableBtIntent = Intent("android.bluetooth.adapter.action.REQUEST_DISABLE")
-    val bluetoothOffLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        isBluetoothOn = !(result.resultCode == Activity.RESULT_OK)
-    }
+    val bluetoothOffLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            isBluetoothOn = result.resultCode != Activity.RESULT_OK
+        }
 
-    var showDevicesList by remember { mutableStateOf(true)}
+    // Estado para mostrar la lista de dispositivos emparejados
+    var showDevicesList by remember { mutableStateOf(true) }
     var isLoading by remember { mutableStateOf(false) }
 
+    // Estado que muestra si la conexión con un dispositivo está en progreso
     var connectedDeviceName by remember { mutableStateOf("Dispositivo") }
 
-    val auxDeviceName = bluetoothConnectionManager.getNameDeviceConnected()
-    if (auxDeviceName != null) connectedDeviceName = auxDeviceName else connectedDeviceName = "Dispositivo"
+    // Nombre del dispositivo conectado actualmente
+    connectedDeviceName = bluetoothConnectionManager.getNameDeviceConnected() ?: "Dispositivo"
 
+    // Manejo de estados para funciones asíncronas
     val scope = rememberCoroutineScope()
 
+    // Contenedor principal
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -80,9 +94,10 @@ fun DevicesScreen(bluetoothConnectionManager: BluetoothConnectionManager)
             .padding(20.dp, 20.dp)
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally)
+        horizontalAlignment = Alignment.CenterHorizontally
+    )
     {
-        Column (
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(20.dp))
@@ -90,12 +105,13 @@ fun DevicesScreen(bluetoothConnectionManager: BluetoothConnectionManager)
                 .padding(30.dp, 15.dp)
         )
         {
-            // Bluetooth switch section
+            // Sección del interruptor de Bluetooth
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically)
+                verticalAlignment = Alignment.CenterVertically
+            )
             {
                 Text(
                     text = "Bluetooth",
@@ -103,10 +119,13 @@ fun DevicesScreen(bluetoothConnectionManager: BluetoothConnectionManager)
                         fontSize = 16.sp,
                     )
                 )
+                // Interruptor para activar o desactivar Bluetooth
                 Switch(
                     checked = isBluetoothOn,
                     onCheckedChange = {
-                        if (!bluetoothConnectionManager.isBluetoothOn()) bluetoothOnLauncher.launch(enableBtIntent)
+                        if (!bluetoothConnectionManager.isBluetoothOn()) bluetoothOnLauncher.launch(
+                            enableBtIntent
+                        )
                         else bluetoothOffLauncher.launch(disableBtIntent)
                     },
                     modifier = Modifier
@@ -125,7 +144,7 @@ fun DevicesScreen(bluetoothConnectionManager: BluetoothConnectionManager)
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Connected status
+            // Sección que muestra el estado de conexión
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -140,8 +159,7 @@ fun DevicesScreen(bluetoothConnectionManager: BluetoothConnectionManager)
                     )
                 )
 
-                if (isLoading)
-                {
+                if (isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(ButtonDefaults.IconSize),
                         color = Color(0xFFBBBBBB)
@@ -180,7 +198,8 @@ fun DevicesScreen(bluetoothConnectionManager: BluetoothConnectionManager)
                     showDevicesList = false
                     showDevicesList = true
                 },
-                modifier = Modifier.requiredSize(13.dp))
+                modifier = Modifier.requiredSize(13.dp)
+            )
             {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
@@ -191,16 +210,20 @@ fun DevicesScreen(bluetoothConnectionManager: BluetoothConnectionManager)
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Column (
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(20.dp))
                 .background(if (isLoading) Color(0xFFDDDDDD) else Color.White)
-                .padding(0.dp, 15.dp))
+                .padding(0.dp, 15.dp)
+        )
         {
             if (showDevicesList) {
-                // List of devices
-                val devicesList = BluetoothHelper.getPairedDevices(context, bluetoothConnectionManager.getBluetoothAdapter())
+                // Lista de dispositivos emparejados
+                val devicesList = BluetoothHelper.getPairedDevices(
+                    context,
+                    bluetoothConnectionManager.getBluetoothAdapter()
+                )
                 var success by remember { mutableStateOf(false) }
                 devicesList?.forEach { (key, value) ->
                     PairedDeviceItem(deviceName = key, enabled = !isLoading) {
@@ -209,11 +232,17 @@ fun DevicesScreen(bluetoothConnectionManager: BluetoothConnectionManager)
                             success = bluetoothConnectionManager.connectToDevice(value)
                             isLoading = false
                             withContext(Dispatchers.Main) {
-                                if (!success) Toast.makeText(context, "ERROR DE CONEXIÓN", Toast.LENGTH_LONG).show()
-                                else Toast.makeText(context, "CONEXIÓN EXITOSA", Toast.LENGTH_LONG).show()
+                                if (!success) Toast.makeText(
+                                    context,
+                                    "ERROR DE CONEXIÓN",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                                else Toast.makeText(context, "CONEXIÓN EXITOSA", Toast.LENGTH_LONG)
+                                    .show()
 
-                                val auxName = bluetoothConnectionManager.getNameDeviceConnected()
-                                if (auxName != null) connectedDeviceName = auxName else connectedDeviceName = "Dispositivo"
+                                connectedDeviceName =
+                                    bluetoothConnectionManager.getNameDeviceConnected()
+                                        ?: "Dispositivo"
                             }
                         }
                     }
@@ -223,6 +252,15 @@ fun DevicesScreen(bluetoothConnectionManager: BluetoothConnectionManager)
     }
 }
 
+/**
+ * Elemento individual de un dispositivo emparejado.
+ *
+ * Representa un botón con el nombre del dispositivo emparejado que permite conectarse al mismo.
+ *
+ * @param deviceName Nombre del dispositivo emparejado.
+ * @param enabled Indica si el botón está habilitado.
+ * @param onClick Acción que se ejecuta cuando se selecciona el dispositivo.
+ */
 @Composable
 fun PairedDeviceItem(deviceName: String, enabled:Boolean = true, onClick: () -> Unit = {}) {
     Button(
@@ -247,12 +285,4 @@ fun PairedDeviceItem(deviceName: String, enabled:Boolean = true, onClick: () -> 
             )
         )
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewBluetoothScreen() {
-    DevicesScreen(
-        bluetoothConnectionManager = BluetoothConnectionManager(null)
-    )
 }
